@@ -29,17 +29,18 @@ int socket_init(socket_t* skt){
 
 	skt->fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (skt->fd == -1){
+        printf("Error: %s\n", strerror(errno));
 		return 1;
 	}
 	return 0;
 }
 
 int socket_destroy(socket_t* skt){
-	if (!shutdown(skt->fd, SHUT_RDWR)){
-		printf("%s \n", "There was an error when shuting down the socket...");
+/*	if (shutdown(skt->fd, SHUT_RDWR) == -1){
+		fprintf(stderr, "There was an error when shuting down the socket: %s \n", strerror(errno));
 		return 1;
-	}
-	if (!close(skt->fd)){
+	}*/
+	if (close(skt->fd) == -1){
 		fprintf(stderr, "Error closing file: %s\n", strerror(errno));
 		return 1;
 	}

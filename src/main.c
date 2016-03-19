@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
 {
 	socket_t skt;
 	socket_init(&skt);
-	printf("%d \n", skt.fd);
+	printf("%s \n", "Socket created!");
 	socket_destroy(&skt);
+	printf("%s \n", "Socket destroyed!");
 	return 0;
 }
