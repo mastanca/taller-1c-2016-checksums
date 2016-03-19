@@ -23,6 +23,7 @@
 
 typedef struct{
 	int fd;
+	struct addrinfo* result;
 }socket_t;
 
 int socket_init(socket_t* skt);
