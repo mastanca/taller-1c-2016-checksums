@@ -14,7 +14,8 @@
 int main(int argc, char *argv[])
 {
 	socket_t skt;
-	skt.fd = 125;
+	socket_init(&skt);
 	printf("%d \n", skt.fd);
+	socket_destroy(&skt);
 	return 0;
 }

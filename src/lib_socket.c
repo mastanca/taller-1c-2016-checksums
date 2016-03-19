@@ -9,6 +9,7 @@
 
 int socket_init(socket_t* skt){
 	int s = 0;
+	int sktfd = 0;
 	struct addrinfo hints;
 	struct addrinfo *ptr;
 	const char *serviceName = "http";
@@ -26,7 +27,22 @@ int socket_init(socket_t* skt){
 		return 1;
 	}
 
-	skt->fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+	skt->fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (skt->fd == -1){
+		return 1;
+	}
+	return 0;
+}
+
+int socket_destroy(socket_t* skt){
+	if (!shutdown(skt->fd, SHUT_RDWR)){
+		printf("%s \n", "There was an error when shuting down the socket...");
+		return 1;
+	}
+	if (!close(skt->fd)){
+		fprintf(stderr, "Error closing file: %s\n", strerror(errno));
+		return 1;
+	}
 	return 0;
 }
 

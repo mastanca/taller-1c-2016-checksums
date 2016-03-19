@@ -18,12 +18,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
 
 typedef struct{
 	int fd;
 }socket_t;
 
 int socket_init(socket_t* skt);
+int socket_destroy(socket_t* skt);
 
 
 
