@@ -83,6 +83,34 @@ int socket_connect(socket_t* skt){
 	return 0;
 }
 
+int socket_receive(socket_t* skt, char* buffer, int size){
+	int received = 0;
+	int response = 0;
+	bool is_a_valid_socket = true;
+
+	while(received < size && is_a_valid_socket){
+		response = recv(skt->fd, &buffer[received], size-received, MSG_NOSIGNAL);
+
+		if (response == 0){
+			// Socket was closed
+			is_a_valid_socket = false;
+		}else if (response < 0) {
+			// There was an error
+			is_a_valid_socket = false;
+		} else {
+			received += response;
+		}
+	}
+
+	if (is_a_valid_socket) {
+		return received;
+	} else {
+		return -1;
+	}
+
+	return 0;
+}
+
 int handle_error(char* function_name){
 	fprintf(stderr, "Error on %s: ", function_name);
 	fprintf(stderr, "%s\n", strerror(errno));
