@@ -28,6 +28,8 @@ typedef struct{
 
 int socket_init(socket_t* skt);
 int socket_destroy(socket_t* skt);
+int socket_bind(socket_t* skt);
+int socket_listen(socket_t* skt, int max_clients);
 
 
 

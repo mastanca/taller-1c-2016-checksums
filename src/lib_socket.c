@@ -10,7 +10,7 @@
 int socket_init(socket_t* skt){
 	int s = 0;
 	struct addrinfo hints;
-	const char *serviceName = "http";
+	const char *serviceName = "12345";
 
 
 	memset(&hints, 0, sizeof(struct addrinfo));
@@ -42,6 +42,17 @@ int socket_destroy(socket_t* skt){
 		fprintf(stderr, "Error closing file: %s\n", strerror(errno));
 		return 1;
 	}
+	return 0;
+}
+
+int socket_bind(socket_t* skt){
+	if (bind(skt->fd, skt->result->ai_addr, skt->result->ai_addrlen ) == -1){
+		printf("Error: %s\n", strerror(errno));
+		close(skt->fd);
+		freeaddrinfo(skt->result);
+		return 1;
+	}
+	freeaddrinfo(skt->result);
 	return 0;
 }
 
