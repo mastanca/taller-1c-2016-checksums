@@ -11,7 +11,7 @@ int socket_init (socket_t* skt){
 	int s = 0;
 	struct addrinfo hints;
 	const char *hostname = "localhost";
-	const char *serviceName = "12346";
+	const char *serviceName = "12345";
 
 
 	memset(&hints, 0, sizeof(struct addrinfo));

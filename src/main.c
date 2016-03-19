@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 		while (strcmp(input, "@exit\n") != 0){
 			memset(&input, 0, sizeof(input));
 			fgets(input, sizeof(input), stdin);
-			socket_send(&skt, input, sizeof(input) + 1);
+			socket_send(&skt, input, sizeof(input));
 			socket_receive(&skt, buffer, sizeof(buffer));
 			printf("%s", buffer);
 		}
@@ -45,10 +45,13 @@ int main(int argc, char *argv[])
 		socket_accept(&acep, &client_skt);
 		printf("%s \n", "Client accepted!");
 		char buffer[100];
-		while (strcmp(buffer, "@exit") != 0){
+		while (strcmp(buffer, "@exit\n") != 0){
 			memset(&buffer, 0, sizeof(buffer));
 			socket_receive(&client_skt, buffer, sizeof(buffer));
-			socket_send(&client_skt, buffer, sizeof(buffer));
+			if (strcmp(buffer, "@exit\n") != 0){
+				socket_send(&client_skt, buffer, sizeof(buffer));
+				printf("Sent %i bytes\n", (int)strlen(buffer));
+			}
 		}
 		socket_destroy(&client_skt);
 		printf("%s \n", "Client destroyed!");
