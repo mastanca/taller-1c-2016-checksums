@@ -14,9 +14,12 @@
 int main(int argc, char *argv[])
 {
 	char* execution_type = argv[1];
+	char* port;
 	if (strcmp(execution_type, "client") == 0){
+		char* hostname = argv[2];
+		port = argv[3];
 		socket_t skt;
-		socket_init(&skt);
+		socket_init(&skt, hostname, port);
 		printf("%s \n", "Socket created!");
 		socket_connect(&skt);
 		printf("%s \n", "Socket connected!");
@@ -34,8 +37,12 @@ int main(int argc, char *argv[])
 		return 0;
 
 	}else if(strcmp(execution_type, "server") == 0){
+		if (argc != 3){
+			return 1;
+		}
+		port = argv[2];
 		socket_t acep;
-		socket_init(&acep);
+		socket_init(&acep, NULL, port);
 		printf("%s \n", "Socket created!");
 		socket_bind(&acep);
 		printf("%s \n", "Socket binded!");

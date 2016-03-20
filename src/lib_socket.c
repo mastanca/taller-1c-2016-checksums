@@ -7,11 +7,15 @@
 
 #include "lib_socket.h"
 
-int socket_init (socket_t* skt){
+int socket_init (socket_t* skt, char* hostname, char* port){
 	int s = 0;
 	struct addrinfo hints;
-	const char *hostname = "localhost";
-	const char *serviceName = "12345";
+
+	if (hostname == NULL){
+		hostname = "localhost";
+	}
+
+	const char *serviceName = port;
 
 
 	memset(&hints, 0, sizeof(struct addrinfo));
