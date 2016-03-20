@@ -30,7 +30,7 @@ int socket_init (socket_t* skt, char* hostname, char* port){
 		return 1;
 	}
 
-	skt->fd = socket(AF_INET, SOCK_STREAM, 0);
+	skt->fd = socket(skt->result->ai_family, skt->result->ai_socktype, skt->result->ai_protocol);
 	if (skt->fd == -1){
 		handle_error("init");
 		return 1;
@@ -79,9 +79,20 @@ int socket_accept (socket_t* skt, socket_t* client_skt) {
 }
 
 int socket_connect (socket_t* skt) {
-	if (connect(skt->fd, skt->result->ai_addr, skt->result->ai_addrlen) == -1){
-		handle_error("connect");
-		close(skt->fd);
+	int s = 0;
+	struct addrinfo *ptr;
+	bool are_we_connected = false;
+	for (ptr = skt->result; ptr != NULL && are_we_connected == false; ptr = ptr->ai_next) {
+		s = connect(skt->fd, ptr->ai_addr, ptr->ai_addrlen);
+		if ( s == -1){
+			handle_error("connect");
+			close(skt->fd);
+			skt->fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+		}
+		are_we_connected = (s != -1);
+	}
+	freeaddrinfo(skt->result);
+	if (are_we_connected == false){
 		return 1;
 	}
 	return 0;
