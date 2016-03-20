@@ -8,7 +8,6 @@
 #include "server.h"
 
 int server_execution(int argc, char* argv[]){
-
 	if (argc != 3){
 		return 1;
 	}
