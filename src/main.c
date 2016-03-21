@@ -11,12 +11,16 @@
 #include "lib_checksum.h"
 #include "server.h"
 
+#define CLIENT "client"
+#define SERVER "server"
+
+
 int main(int argc, char *argv[]){
 //	char* execution_type = argv[1];
-//	if (strcmp(execution_type, "client") == 0){
+//	if (strcmp(execution_type, CLIENT) == 0){
 //		return client_execution(argc, argv);
 //
-//	}else if(strcmp(execution_type, "server") == 0){
+//	}else if(strcmp(execution_type, SERVER) == 0){
 //		return server_execution(argc, argv);
 //	} else {
 //		return 1;
