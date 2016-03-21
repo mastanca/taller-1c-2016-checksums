@@ -22,19 +22,19 @@
 #include <errno.h>
 #include <stdbool.h>
 
-typedef struct{
+typedef struct socket{
 	int fd;
 	struct addrinfo* result;
 }socket_t;
 
-int socket_init (socket_t* skt, char* hostname, char* port);
-int socket_destroy (socket_t* skt);
-int socket_bind (socket_t* skt);
-int socket_listen (socket_t* skt, int max_clients);
-int socket_accept (socket_t* skt, socket_t* client_skt);
-int socket_connect (socket_t* skt);
-int socket_receive (socket_t* skt, char* buffer, int size);
-int socket_send (socket_t* skt, char* buffer, int size);
+int socket_init(socket_t* skt, char* hostname, char* port);
+int socket_destroy(socket_t* skt);
+int socket_bind(socket_t* skt);
+int socket_listen(socket_t* skt, int max_clients);
+int socket_accept(socket_t* skt, socket_t* client_skt);
+int socket_connect(socket_t* skt);
+int socket_receive(socket_t* skt, char* buffer, int size);
+int socket_send(socket_t* skt, char* buffer, int size);
 
 int handle_error(char* function_name);
 
