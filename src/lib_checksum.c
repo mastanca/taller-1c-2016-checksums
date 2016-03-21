@@ -21,7 +21,7 @@ static int set_checksum_result(checksum_t* checksum){
 	return 0;
 }
 
-int set_checksum_value(checksum_t* checksum, char* input, size_t size){
+int set_checksum(checksum_t* checksum, char* input, size_t size){
 	checksum_init(checksum);
 
 	for (int i = 0; i < size; ++i) {

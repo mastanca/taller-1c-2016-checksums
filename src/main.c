@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 //	}
 	checksum_t checksum;
 	char* test_checksum = "ABC";
-	set_checksum_value(&checksum, test_checksum, 3);
+	set_checksum(&checksum, test_checksum, 3);
 	printf("%lu\n" , checksum.checksum);
 
 

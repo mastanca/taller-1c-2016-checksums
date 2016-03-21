@@ -17,7 +17,7 @@ typedef struct checksum{
 	unsigned long higher;
 } checksum_t;
 
-int set_checksum_value(checksum_t* checksum, char* input, size_t size);
+int set_checksum(checksum_t* checksum, char* input, size_t size);
 int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum, char old_byte, char new_byte, size_t size);
 
 #endif /* SRC_LIB_CHECKSUM_H_ */
