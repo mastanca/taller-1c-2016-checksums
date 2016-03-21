@@ -26,13 +26,18 @@ int main(int argc, char *argv[]){
 //		return 1;
 //	}
 	checksum_t checksum;
-	char* test_checksum = "ABC";
+	char* test_checksum = "ABCDEFG";
 	set_checksum(&checksum, test_checksum, 3);
 	printf("%lu\n" , checksum.checksum);
 
+	char* test_new_checksum = "ABCDEFG";
+
+	checksum_t new_old_checksum;
+	set_checksum(&new_old_checksum, test_new_checksum + 1, 3);
+	printf("%lu\n" , new_old_checksum.checksum);
 
 	checksum_t new_checksum;
-	rolling_checksum(&new_checksum, &checksum, 'A', 'D', 3);
+	rolling_checksum(&new_checksum, &checksum, test_checksum + 1 , 3);
 	printf("%lu\n" , new_checksum.checksum);
 	return 0;
 }

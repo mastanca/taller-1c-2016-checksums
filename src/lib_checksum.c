@@ -6,6 +6,7 @@
  */
 
 #include "lib_checksum.h"
+#include <stdio.h>
 
 static int checksum_init(checksum_t* checksum){
 	checksum->lower = 0;
@@ -34,11 +35,12 @@ int set_checksum(checksum_t* checksum, char* input, size_t size){
 	return 0;
 }
 
-int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum, char old_byte, char new_byte, size_t size){
+// Rolling checksum assumes buffer is contiguous in memory
+int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum, char* buffer, size_t size){
 	checksum_init(new_checksum);
 
-	new_checksum->lower = old_checksum->lower - old_byte + new_byte;
-	new_checksum->higher = old_checksum->higher - size*old_byte + new_checksum->lower;
+	new_checksum->lower = ((old_checksum->lower - (ulong)buffer[-1] + (ulong)buffer[size-1])) % M;
+	new_checksum->higher = old_checksum->higher - (size * (ulong)buffer[-1]) + new_checksum->lower;
 
 	set_checksum_result(new_checksum);
 
