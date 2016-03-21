@@ -46,7 +46,8 @@ int main(int argc, char *argv[]){
 //	printf("%lu\n" , new_checksum.checksum);
 
 	FILE* file = NULL;
-	open_file(file, "./test_files/source", "r");
+	open_file(file, "./test_files/remote", "r");
+	fclose(file);
 //	char* buffer[100];
 //	read(file, buffer, 50);
 //	printf("%s \n", buffer);
