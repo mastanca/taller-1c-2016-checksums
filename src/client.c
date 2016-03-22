@@ -53,6 +53,7 @@ static int send_remote_filename(socket_t* skt, char* filename, size_t block_size
 
 	sprintf(message_to_send, "%u%s%u", (unsigned int)filename_size, filename, (unsigned int)block_size);
 
+	printf("%s \n", message_to_send);
 	socket_send(skt, message_to_send, sizeof(message_to_send));
 
 	return 0;

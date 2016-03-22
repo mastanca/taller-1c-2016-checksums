@@ -7,33 +7,58 @@
 
 #include "server.h"
 
+static void play_with_socket(server_t server, socket_t* client_skt){
+	char buffer[100];
+	while (strcmp(buffer, "@exit\n") != 0){
+		memset(&buffer, 0, sizeof(buffer));
+		socket_receive(client_skt, buffer, sizeof(buffer));
+		if (strcmp(buffer, "@exit\n") != 0){
+			socket_send(client_skt, buffer, sizeof(buffer));
+			printf("Sent %i bytes\n", (int)strlen(buffer));
+		}
+	}
+}
+
+
 int server_execution(int argc, char* argv[]){
 	if (argc != 3){
 		return 1;
 	}
 	char* port = argv[2];
 	socket_t acep;
-	socket_init(&acep, NULL, port);
+	server_t server;
+	server.skt = &acep;
+	socket_init(server.skt, NULL, port);
 	printf("%s \n", "Socket created!");
-	socket_bind(&acep);
+	socket_bind(server.skt);
 	printf("%s \n", "Socket binded!");
-	socket_listen(&acep, 5);
+	socket_listen(server.skt, 5);
 	printf("%s \n", "Socket listening!");
 	socket_t client_skt;
-	socket_accept(&acep, &client_skt);
+	socket_accept(server.skt, &client_skt);
 	printf("%s \n", "Client accepted!");
-	char buffer[100];
-	while (strcmp(buffer, "@exit\n") != 0){
-		memset(&buffer, 0, sizeof(buffer));
-		socket_receive(&client_skt, buffer, sizeof(buffer));
-		if (strcmp(buffer, "@exit\n") != 0){
-			socket_send(&client_skt, buffer, sizeof(buffer));
-			printf("Sent %i bytes\n", (int)strlen(buffer));
-		}
-	}
+
+	receive_remote_filename(&client_skt, server.remote_file);
+
+//	play_with_socket(server, &client_skt);
+
 	socket_destroy(&client_skt);
 	printf("%s \n", "Client destroyed!");
-	socket_destroy(&acep);
+	socket_destroy(server.skt);
 	printf("%s \n", "Socket destroyed!");
+	return 0;
+}
+
+int receive_remote_filename(socket_t* skt, FILE* remote_file){
+	char filename_size_char[4];
+	socket_receive(skt, filename_size_char, sizeof(filename_size_char));
+	size_t filename_size = atoi(filename_size_char);
+	printf("%u \n", (unsigned int)filename_size);
+
+
+	char filename[filename_size];
+	socket_receive(skt, filename, sizeof(filename));
+	printf("%s \n", filename);
+
 	return 0;
 }
