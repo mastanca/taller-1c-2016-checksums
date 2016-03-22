@@ -19,6 +19,7 @@ typedef struct client{
 
 int client_execution(int argc, char* argv[]);
 int open_file(FILE* file, char* file_route, char* mode);
+static int send_remote_filename(socket_t* skt, char* filename, size_t block_size);
 
 
 #endif /* SRC_CLIENT_H_ */

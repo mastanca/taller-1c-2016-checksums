@@ -18,15 +18,15 @@
 int main(int argc, char *argv[]){
 // SERVER TESTING
 
-//	char* execution_type = argv[1];
-//	if (strcmp(execution_type, CLIENT) == 0){
-//		return client_execution(argc, argv);
-//
-//	}else if(strcmp(execution_type, SERVER) == 0){
-//		return server_execution(argc, argv);
-//	} else {
-//		return 1;
-//	}
+	char* execution_type = argv[1];
+	if (strcmp(execution_type, CLIENT) == 0){
+		return client_execution(argc, argv);
+
+	}else if(strcmp(execution_type, SERVER) == 0){
+		return server_execution(argc, argv);
+	} else {
+		return 1;
+	}
 
 // CHECKSUM TESTING
 
@@ -45,11 +45,12 @@ int main(int argc, char *argv[]){
 //	rolling_checksum(&new_checksum, &checksum, test_checksum + 1 , 3);
 //	printf("%lu\n" , new_checksum.checksum);
 
-	FILE* file = NULL;
-	open_file(file, "./test_files/remote", "r");
-	fclose(file);
+//	FILE* file = NULL;
+//	open_file(file, "./test_files/remote", "r");
+//	fclose(file);
 //	char* buffer[100];
 //	read(file, buffer, 50);
 //	printf("%s \n", buffer);
+
 	return 0;
 }
