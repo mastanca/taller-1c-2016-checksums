@@ -44,17 +44,16 @@ int client_execution(int argc, char* argv[]){
 }
 
 static int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
-	size_t filename_length = strlen( filename );
-	char *buffer = malloc( filename_length + 2 * sizeof( size_t ) );
-	size_t nose = 1234;
+	size_t filename_length = strlen(filename);
+	char *buffer = malloc(filename_length + 2 * sizeof(size_t));
 
-	memcpy( buffer, &filename_length, sizeof( size_t ) );
-	memcpy( buffer + sizeof( size_t ), filename, filename_length );
-	memcpy( buffer + sizeof( size_t ) + filename_length, &nose, sizeof( size_t ) );
+	memcpy(buffer, &filename_length, sizeof(size_t));
+	memcpy(buffer + sizeof(size_t), filename, filename_length);
+	memcpy(buffer + sizeof(size_t) + filename_length, &block_size, sizeof(size_t));
 
-	socket_send( skt, buffer, filename_length + 2 * sizeof( size_t ) );
+	socket_send(skt, buffer, filename_length + 2 * sizeof(size_t));
 
-	free( buffer );
+	free(buffer);
 
 	return 0;
 }
