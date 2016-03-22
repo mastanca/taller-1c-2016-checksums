@@ -36,6 +36,11 @@ int client_execution(int argc, char* argv[]){
 	printf("%s \n", "Socket connected!");
 
 	send_remote_filename(client.skt, remote_file_name, block_size);
+
+	// Open old file
+	FILE* old_file = 0;
+	open_file(old_file, old_file_name, (char*)'r' );
+
 //	play_with_socket(client);
 
 	socket_destroy(client.skt);
