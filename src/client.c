@@ -44,21 +44,44 @@ int client_execution(int argc, char* argv[]){
 }
 
 static int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
+	size_t filename_length = strlen( filename );
+	char *buffer = malloc( filename_length + 2 * sizeof( size_t ) );
+	size_t nose = 1234;
+
+	memcpy( buffer, &filename_length, sizeof( size_t ) );
+	memcpy( buffer + sizeof( size_t ), filename, filename_length );
+	memcpy( buffer + sizeof( size_t ) + filename_length, &nose, sizeof( size_t ) );
+
+	socket_send( skt, buffer, filename_length + 2 * sizeof( size_t ) );
+
+	free( buffer );
+
+	return 0;
+}
+
+/*
+static int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
 	size_t filename_size;
 	filename_size = strlen(filename);
+	char* filename_size_string;
 	int message_size;
 
 	message_size = sizeof(int)*2 + filename_size;
 	char message_to_send[message_size];
 
-	sprintf(message_to_send, "%u%s%u", (unsigned int)filename_size, filename, (unsigned int)block_size);
+	itoa(filename_size, filename_size_string);
+	printf("%s \n", filename_size_string);
+
+
+	sprintf(message_to_send, "%u%s%u", filename_size, filename, block_size);
+
 
 	printf("%s \n", message_to_send);
 	socket_send(skt, message_to_send, sizeof(message_to_send));
 
 	return 0;
 }
-
+*/
 int open_file(FILE* file, char* file_route, char* mode){
 	file = fopen(file_route, mode);
 	if ( file == NULL ) return 1;

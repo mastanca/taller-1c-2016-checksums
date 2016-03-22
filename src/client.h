@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "lib_socket.h"
+#include "itoa.h"
 
 typedef struct client{
 	socket_t* skt;
