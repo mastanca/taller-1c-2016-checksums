@@ -50,7 +50,6 @@ int server_execution(int argc, char* argv[]){
 }
 
 int receive_remote_filename(socket_t* skt, FILE* remote_file){
-	// BUG: Only works for filename sizes of 1 digit
 	size_t filename_length;
 	size_t block_size;
 
@@ -59,14 +58,6 @@ int receive_remote_filename(socket_t* skt, FILE* remote_file){
 	char *name = malloc(filename_length + 1);
 	socket_receive(skt, name, filename_length);
 	name[filename_length] = 0;
-
-	/*size_t filename_size = atoi(filename_size_char);
-	printf("%u \n", (unsigned int)filename_size);
-
-
-	char filename[filename_size];
-	socket_receive(skt, filename, sizeof(filename));
-	printf("%s \n", filename);*/
 
 	socket_receive(skt, (char*)&block_size, sizeof(size_t));
 

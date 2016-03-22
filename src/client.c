@@ -58,29 +58,6 @@ static int send_remote_filename(socket_t* skt, char* filename, size_t block_size
 	return 0;
 }
 
-/*
-static int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
-	size_t filename_size;
-	filename_size = strlen(filename);
-	char* filename_size_string;
-	int message_size;
-
-	message_size = sizeof(int)*2 + filename_size;
-	char message_to_send[message_size];
-
-	itoa(filename_size, filename_size_string);
-	printf("%s \n", filename_size_string);
-
-
-	sprintf(message_to_send, "%u%s%u", filename_size, filename, block_size);
-
-
-	printf("%s \n", message_to_send);
-	socket_send(skt, message_to_send, sizeof(message_to_send));
-
-	return 0;
-}
-*/
 int open_file(FILE* file, char* file_route, char* mode){
 	file = fopen(file_route, mode);
 	if ( file == NULL ) return 1;
