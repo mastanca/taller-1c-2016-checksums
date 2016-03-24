@@ -42,11 +42,11 @@ int client_execution(int argc, char* argv[]){
 	FILE* old_file = NULL;
 	old_file = fopen(old_file_name, "r");
 	if ( old_file != NULL){
-		send_file_chunks(old_file, block_size);
+		send_file_chunks(&client, old_file, block_size);
 	}
 
 //	play_with_socket(client);
-
+	fclose(old_file);
 	socket_destroy(client.skt);
 	printf("%s \n", "Socket destroyed!");
 	return 0;
@@ -67,17 +67,34 @@ int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
 	return 0;
 }
 
-int send_file_chunks(FILE* file, size_t block_size){
+int prepare_checksum_for_sending(char* buffer, checksum_t* checksum){
+	memset(buffer, 0, strlen(buffer));
+	sprintf(buffer, "%d", CHECKSUM_INDICATOR);
+	char tmp_buffer[sizeof(checksum->checksum)];
+	sprintf(tmp_buffer, "%04lx", checksum->checksum);
+	strcat(buffer, tmp_buffer);
+	return 0;
+}
+
+int send_file_chunks(client_t* client, FILE* file, size_t block_size){
 	checksum_t checksum;
 	char buffer[block_size];
 	while(!feof(file)){
 		read_from_file(file, buffer, block_size);
-		if (strcmp(buffer, "\n") != 0 && strcmp(buffer, "" ) != 0){
+		if (strcmp(buffer, "") != 0) {
 			set_checksum(&checksum, buffer, block_size);
-			printf("%s, checksum: %04lx \n", buffer, checksum.checksum);
+//			printf("%s, checksum: %04lx \n", buffer, checksum.checksum);
+			char buffer_to_send[sizeof(int) + sizeof(char) ];
+			prepare_checksum_for_sending(buffer_to_send, &checksum);
+			socket_send(client->skt, buffer_to_send, sizeof(buffer_to_send));
+			memset(buffer_to_send, 0, sizeof(buffer_to_send));
+			memset(buffer, 0, sizeof(buffer));
 		}
-		memset(buffer, 0, sizeof(buffer));
 	}
+	char buffer_to_send[sizeof(int)];
+	sprintf(buffer_to_send, "%d", END_OF_LIST);
+//	printf("%s \n", buffer_to_send);
+	socket_send(client->skt, buffer_to_send, sizeof(buffer_to_send));
 	return 0;
 }
 
