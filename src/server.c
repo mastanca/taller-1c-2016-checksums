@@ -70,3 +70,14 @@ int receive_remote_filename(socket_t* skt, FILE* remote_file){
 
 	return 0;
 }
+
+int receive_checksum_list(socket_t* skt, char* buffer, size_t block_size){
+	size_t initial_size = sizeof(CHECKSUM_INDICATOR) + sizeof(int);
+	char* input = malloc(initial_size);
+	while (strcmp(buffer, "2") != 0){
+		socket_receive(skt, input, initial_size);
+
+	}
+	free(input);
+	return 0;
+}
