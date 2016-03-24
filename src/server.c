@@ -7,17 +7,17 @@
 
 #include "server.h"
 
-static void play_with_socket(server_t server, socket_t* client_skt){
-	char buffer[100];
-	while (strcmp(buffer, "@exit\n") != 0){
-		memset(&buffer, 0, sizeof(buffer));
-		socket_receive(client_skt, buffer, sizeof(buffer));
-		if (strcmp(buffer, "@exit\n") != 0){
-			socket_send(client_skt, buffer, sizeof(buffer));
-			printf("Sent %i bytes\n", (int)strlen(buffer));
-		}
-	}
-}
+//static void play_with_socket(server_t server, socket_t* client_skt){
+//	char buffer[100];
+//	while (strcmp(buffer, "@exit\n") != 0){
+//		memset(&buffer, 0, sizeof(buffer));
+//		socket_receive(client_skt, buffer, sizeof(buffer));
+//		if (strcmp(buffer, "@exit\n") != 0){
+//			socket_send(client_skt, buffer, sizeof(buffer));
+//			printf("Sent %i bytes\n", (int)strlen(buffer));
+//		}
+//	}
+//}
 
 
 int server_execution(int argc, char* argv[]){

@@ -39,7 +39,7 @@ int client_execution(int argc, char* argv[]){
 
 	// Open old file
 	FILE* old_file = 0;
-	open_file(old_file, old_file_name, (char*)'r' );
+	open_file(old_file, old_file_name, "r");
 
 //	play_with_socket(client);
 
