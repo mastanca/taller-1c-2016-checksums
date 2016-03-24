@@ -8,6 +8,9 @@
 #ifndef SRC_CLIENT_H_
 #define SRC_CLIENT_H_
 
+#define CHECKSUM_INDICATOR 0x01
+#define END_OF_LIST 0x02
+
 #include <stdio.h>
 #include <string.h>
 #include "lib_socket.h"
@@ -21,5 +24,6 @@ typedef struct client{
 
 int client_execution(int argc, char* argv[]);
 int send_remote_filename(socket_t* skt, char* filename, size_t block_size);
+int send_file_chunks(FILE* file, size_t block_size);
 
 #endif /* SRC_CLIENT_H_ */

@@ -9,9 +9,11 @@
 
 // Reads block_size chars from file and return result in buffer
 int read_from_file(FILE* file, char* buffer, size_t block_size){
-	if (!feof(file)){
-		fgets(buffer, block_size + 1, file);
-	 }
+	char tmp_buffer[block_size + 1];
+	if (!feof(file))
+		fgets(tmp_buffer, block_size + 1, file);
+	if (strlen(tmp_buffer) == block_size)
+		strcpy(buffer, tmp_buffer);
 	return 0;
 }
 

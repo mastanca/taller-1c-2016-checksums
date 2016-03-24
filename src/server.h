@@ -8,6 +8,9 @@
 #ifndef SRC_SERVER_H_
 #define SRC_SERVER_H_
 
+#define CHECKSUM_INDICATOR 0x01
+#define END_OF_LIST 0x02
+
 #include <stdio.h>
 #include <string.h>
 #include "lib_socket.h"

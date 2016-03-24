@@ -38,15 +38,11 @@ int client_execution(int argc, char* argv[]){
 
 	send_remote_filename(client.skt, remote_file_name, block_size);
 
-	checksum_t checksum;
 	// Open old file
 	FILE* old_file = NULL;
-	char buffer[block_size];
 	old_file = fopen(old_file_name, "r");
 	if ( old_file != NULL){
-		read_from_file(old_file, buffer, block_size);
-		set_checksum(&checksum, buffer, block_size);
-		printf("%s, checksum: %04lx \n", buffer, checksum.checksum);
+		send_file_chunks(old_file, block_size);
 	}
 
 //	play_with_socket(client);
@@ -68,6 +64,20 @@ int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
 
 	free(buffer);
 
+	return 0;
+}
+
+int send_file_chunks(FILE* file, size_t block_size){
+	checksum_t checksum;
+	char buffer[block_size];
+	while(!feof(file)){
+		read_from_file(file, buffer, block_size);
+		if (strcmp(buffer, "\n") != 0 && strcmp(buffer, "" ) != 0){
+			set_checksum(&checksum, buffer, block_size);
+			printf("%s, checksum: %04lx \n", buffer, checksum.checksum);
+		}
+		memset(buffer, 0, sizeof(buffer));
+	}
 	return 0;
 }
 
