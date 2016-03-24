@@ -22,6 +22,7 @@ static int set_checksum_result(checksum_t* checksum){
 	return 0;
 }
 
+// Stores the resulting checksum in checksum arg
 int set_checksum(checksum_t* checksum, char* input, size_t size){
 	checksum_init(checksum);
 

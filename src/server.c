@@ -29,6 +29,9 @@ int server_execution(int argc, char* argv[]){
 	server_t server;
 	server.skt = &acep;
 	socket_init(server.skt, NULL, port);
+	// Avoid time wait
+	int option = 1;
+	setsockopt(server.skt->fd,SOL_SOCKET,(SO_REUSEPORT | SO_REUSEADDR),(char*)&option,sizeof(option));
 	printf("%s \n", "Socket created!");
 	socket_bind(server.skt);
 	printf("%s \n", "Socket binded!");

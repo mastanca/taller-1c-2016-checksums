@@ -23,8 +23,9 @@ int client_execution(int argc, char* argv[]){
 	client_t client;
 	char* hostname = argv[2];
 	char* port = argv[3];
+
 	char* old_file_name = argv[4];
-	char* new_file_name = argv[5];
+	//char* new_file_name = argv[5];
 	char* remote_file_name = argv[6];
 	size_t block_size = atoi(argv[7]);
 
@@ -37,9 +38,16 @@ int client_execution(int argc, char* argv[]){
 
 	send_remote_filename(client.skt, remote_file_name, block_size);
 
+	checksum_t checksum;
 	// Open old file
-	FILE* old_file = 0;
-	open_file(old_file, old_file_name, "r");
+	FILE* old_file = NULL;
+	char buffer[block_size];
+	old_file = fopen(old_file_name, "r");
+	if ( old_file != NULL){
+		read_from_file(old_file, buffer, block_size);
+		set_checksum(&checksum, buffer, block_size);
+		printf("%s, checksum: %04lx \n", buffer, checksum.checksum);
+	}
 
 //	play_with_socket(client);
 
@@ -48,7 +56,7 @@ int client_execution(int argc, char* argv[]){
 	return 0;
 }
 
-static int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
+int send_remote_filename(socket_t* skt, char* filename, size_t block_size){
 	size_t filename_length = strlen(filename);
 	char *buffer = malloc(filename_length + 2 * sizeof(size_t));
 
@@ -60,17 +68,6 @@ static int send_remote_filename(socket_t* skt, char* filename, size_t block_size
 
 	free(buffer);
 
-	return 0;
-}
-
-int open_file(FILE* file, char* file_route, char* mode){
-	file = fopen(file_route, mode);
-	if ( file == NULL ) return 1;
-	while (!feof(file)){
-		int c = fgetc(file);
-		if ( c != EOF )
-			printf("%c", (char) c);
-	 }
 	return 0;
 }
 

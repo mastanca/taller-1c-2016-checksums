@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "lib_socket.h"
+#include "file_handler.h"
+#include "lib_checksum.h"
 
 typedef struct client{
 	socket_t* skt;
@@ -18,8 +20,6 @@ typedef struct client{
 }client_t;
 
 int client_execution(int argc, char* argv[]);
-int open_file(FILE* file, char* file_route, char* mode);
-static int send_remote_filename(socket_t* skt, char* filename, size_t block_size);
-
+int send_remote_filename(socket_t* skt, char* filename, size_t block_size);
 
 #endif /* SRC_CLIENT_H_ */
