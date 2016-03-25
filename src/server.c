@@ -93,7 +93,7 @@ int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server){
 		if (CHECKSUM_INDICATOR == code){
 			socket_receive(skt, (char*)&checksum, sizeof(checksum));
 			checksum = ntohl(checksum);
-			printf("Received checksum %i \n", checksum);
+			printf("Received checksum %i, of size %lx \n", checksum, sizeof(checksum));
 			checksum_list_append(&(server->checksum_list), checksum);
 		}
 	}
