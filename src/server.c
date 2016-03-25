@@ -84,13 +84,17 @@ int receive_remote_filename(socket_t* skt, server_t* server){
 
 int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server){
 	printf("%s \n", "Receiving checksum list");
-	char code[sizeof(char)];
-	char tmp_buffer[sizeof(int)];
-	while (strcmp(code, "2") != 0){
-		socket_receive(skt, code, sizeof(char));
-		if (CHECKSUM_INDICATOR == strtol(code, NULL, 10)){
-			socket_receive(skt, tmp_buffer, sizeof(tmp_buffer));
-			checksum_list_append(&(server->checksum_list), strtol(tmp_buffer, (char**)NULL, 16));
+	int code;
+	int checksum;
+	while ( code != END_OF_LIST){
+		socket_receive(skt, (char*)&code, sizeof(code));
+		code = ntohl(code);
+		printf("Received code %i \n", code);
+		if (CHECKSUM_INDICATOR == code){
+			socket_receive(skt, (char*)&checksum, sizeof(checksum));
+			checksum = ntohl(checksum);
+			printf("Received checksum %i \n", checksum);
+			checksum_list_append(&(server->checksum_list), checksum);
 		}
 	}
 	return 0;
