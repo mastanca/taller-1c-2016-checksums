@@ -48,7 +48,11 @@ int server_execution(int argc, char* argv[]){
 	receive_remote_filename(&client_skt, &server);
 
 	receive_checksum_list(&client_skt, server.block_size, &server);
-
+//	printf("Printing list \n");
+//	for (int var = 0; var < server.checksum_list.size; ++var) {
+//		int temp = checksum_list_get(&server.checksum_list,var);
+//		printf("%i \n", temp);
+//	}
 //	play_with_socket(server, &client_skt);
 
 	socket_destroy(&client_skt);
