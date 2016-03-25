@@ -82,19 +82,19 @@ int send_file_chunks(client_t* client, FILE* file, size_t block_size){
 	while(!feof(file)){
 		read_from_file(file, buffer, block_size);
 		if (strcmp(buffer, "") != 0) {
+			int code = htonl(CHECKSUM_INDICATOR);
+			socket_send(client->skt, (char*)&code, sizeof(CHECKSUM_INDICATOR));
+			printf("Sending code %d\n", CHECKSUM_INDICATOR);
 			set_checksum(&checksum, buffer, block_size);
-//			printf("%s, checksum: %04lx \n", buffer, checksum.checksum);
-			char buffer_to_send[sizeof(int) + sizeof(char) ];
-			prepare_checksum_for_sending(buffer_to_send, &checksum);
-			socket_send(client->skt, buffer_to_send, sizeof(buffer_to_send));
-			memset(buffer_to_send, 0, sizeof(buffer_to_send));
+			int number_to_send = htonl(checksum.checksum);
+			printf("Sending %d, this is %lx bytes \n", (int)checksum.checksum, sizeof((int)checksum.checksum));
+			socket_send(client->skt, (char*)&number_to_send, sizeof(number_to_send));
 			memset(buffer, 0, sizeof(buffer));
 		}
 	}
-	char buffer_to_send[sizeof(int)];
-	sprintf(buffer_to_send, "%d", END_OF_LIST);
-//	printf("%s \n", buffer_to_send);
-	socket_send(client->skt, buffer_to_send, sizeof(buffer_to_send));
+	printf("Sending code %d\n", END_OF_LIST);
+	int code = htonl(END_OF_LIST);
+	socket_send(client->skt, (char*)&code, sizeof(code));
 	return 0;
 }
 

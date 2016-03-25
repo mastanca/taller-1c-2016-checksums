@@ -17,7 +17,6 @@
 
 int main(int argc, char *argv[]){
 // SERVER TESTING
-
 	char* execution_type = argv[1];
 	if (strcmp(execution_type, CLIENT) == 0){
 		return client_execution(argc, argv);

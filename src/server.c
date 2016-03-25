@@ -19,7 +19,6 @@
 //	}
 //}
 
-
 int server_execution(int argc, char* argv[]){
 	if (argc != 3){
 		return 1;
@@ -28,6 +27,11 @@ int server_execution(int argc, char* argv[]){
 	socket_t acep;
 	server_t server;
 	server.skt = &acep;
+
+	checksum_list_t checksum_list;
+	server.checksum_list = checksum_list;
+	checksum_list_init(&server.checksum_list);
+
 	socket_init(server.skt, NULL, port);
 	// Avoid time wait
 	int option = 1;
@@ -41,7 +45,9 @@ int server_execution(int argc, char* argv[]){
 	socket_accept(server.skt, &client_skt);
 	printf("%s \n", "Client accepted!");
 
-	receive_remote_filename(&client_skt, server.remote_file);
+	receive_remote_filename(&client_skt, &server);
+
+	receive_checksum_list(&client_skt, server.block_size, &server);
 
 //	play_with_socket(server, &client_skt);
 
@@ -49,10 +55,12 @@ int server_execution(int argc, char* argv[]){
 	printf("%s \n", "Client destroyed!");
 	socket_destroy(server.skt);
 	printf("%s \n", "Socket destroyed!");
+	// Free checksum list
+	checksum_list_free(&server.checksum_list);
 	return 0;
 }
 
-int receive_remote_filename(socket_t* skt, FILE* remote_file){
+int receive_remote_filename(socket_t* skt, server_t* server){
 	size_t filename_length;
 	size_t block_size;
 
@@ -65,19 +73,25 @@ int receive_remote_filename(socket_t* skt, FILE* remote_file){
 	socket_receive(skt, (char*)&block_size, sizeof(size_t));
 
 	printf("%u\n%u\n%s\n", (unsigned int)filename_length, (unsigned int)block_size, name);
+	server->block_size = block_size;
+
+	// Open remote file here and assign to server_t
 
 	free(name);
 
 	return 0;
 }
 
-int receive_checksum_list(socket_t* skt, char* buffer, size_t block_size){
-	size_t initial_size = sizeof(CHECKSUM_INDICATOR) + sizeof(int);
-	char* input = malloc(initial_size);
-	while (strcmp(buffer, "2") != 0){
-		socket_receive(skt, input, initial_size);
-
+int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server){
+	printf("%s \n", "Receiving checksum list");
+	char code[sizeof(char)];
+	char tmp_buffer[sizeof(int)];
+	while (strcmp(code, "2") != 0){
+		socket_receive(skt, code, sizeof(char));
+		if (CHECKSUM_INDICATOR == strtol(code, NULL, 10)){
+			socket_receive(skt, tmp_buffer, sizeof(tmp_buffer));
+			checksum_list_append(&(server->checksum_list), strtol(tmp_buffer, (char**)NULL, 16));
+		}
 	}
-	free(input);
 	return 0;
 }
