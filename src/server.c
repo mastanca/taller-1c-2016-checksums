@@ -28,9 +28,9 @@ int server_execution(int argc, char* argv[]){
 	server_t server;
 	server.skt = &acep;
 
-	checksum_list_t checksum_list;
-	server.checksum_list = checksum_list;
-	checksum_list_init(&server.checksum_list);
+	list_t list;
+	server.checksum_list= list;
+	list_init(&server.checksum_list);
 
 	socket_init(server.skt, NULL, port);
 	// Avoid time wait
@@ -49,18 +49,92 @@ int server_execution(int argc, char* argv[]){
 
 	receive_checksum_list(&client_skt, server.block_size, &server);
 //	printf("Printing list \n");
-//	for (int var = 0; var < server.checksum_list.size; ++var) {
-//		int temp = checksum_list_get(&server.checksum_list,var);
+//	for (int var = 0; var < server.list.size; ++var) {
+//		int temp = list_get(&server.list,var);
 //		printf("%i \n", temp);
 //	}
 //	play_with_socket(server, &client_skt);
+
+	if (server.remote_file != NULL)
+		start_comparison_sequence(&server, &client_skt);
 
 	socket_destroy(&client_skt);
 	printf("%s \n", "Client destroyed!");
 	socket_destroy(server.skt);
 	printf("%s \n", "Socket destroyed!");
+	fclose(server.remote_file);
 	// Free checksum list
-	checksum_list_free(&server.checksum_list);
+	list_free(&server.checksum_list);
+	return 0;
+}
+
+int start_comparison_sequence(server_t* server, socket_t* skt){
+	list_t window_out_bytes;
+	list_init(&window_out_bytes);
+
+	// Load new block from file
+	char block[server->block_size];
+	read_from_file(server->remote_file, block, sizeof(block));
+
+	// Get checksum of the new block
+	checksum_t checksum;
+	set_checksum(&checksum, (char*)&block, sizeof(block));
+	printf("Remote checksum of %s: %lx \n", block, checksum.checksum);
+
+	while(!feof(server->remote_file)){
+		int i = 0;
+		int found_index = 0;
+		bool found = false;
+		while(i < server->checksum_list.size && !found ){
+			int i_element = list_get(&server->checksum_list, i);
+			if(checksum.checksum == i_element){
+				found = true;
+				found_index = i;
+				printf("Checksum found in list \n");
+			}
+			i++;
+		}
+		if (!found){
+			char byte_to_window = block[0];
+			list_append(&window_out_bytes, byte_to_window);
+			printf("Saved %c into windowed bytes\n", (char)byte_to_window);
+			fseek(server->remote_file, WINDOW_BYTE_DISPLACEMENT, SEEK_CUR);
+			read_from_file(server->remote_file, (char*)&block, sizeof(block));
+			char rolling_buffer[server->block_size + 1];
+			memset(rolling_buffer, 0, sizeof(rolling_buffer));
+			rolling_buffer[0] = byte_to_window;
+			strcat(rolling_buffer, block);
+			checksum_t old_checksum;
+			old_checksum = checksum;
+			printf("Rolling buffer: %s\n", rolling_buffer);
+			rolling_checksum(&checksum, &old_checksum, (char*)&rolling_buffer +1, server->block_size);
+			printf("Remote rolling checksum of %s: %lx \n", block, checksum.checksum);
+		}else{
+			if (window_out_bytes.size > 0){
+				for (int i = 0; i < window_out_bytes.size; ++i) {
+					char i_element = list_get(&window_out_bytes, i);
+					printf("Sending windowed %c \n", i_element);
+				}
+				list_free(&window_out_bytes);
+				list_init(&window_out_bytes);
+			}
+			printf("Sending block number %i \n", found_index);
+			read_from_file(server->remote_file, (char*)&block, sizeof(block));
+			set_checksum(&checksum, (char*)&block, sizeof(block));
+		}
+
+	}
+	// If there are remaining windowed bytes send them
+	if (window_out_bytes.size > 0){
+		for (int i = 0; i < window_out_bytes.size; ++i) {
+			char i_element = list_get(&window_out_bytes, i);
+			printf("Sending windowed %c \n", i_element);
+		}
+		list_free(&window_out_bytes);
+	}
+
+	// SEND END OF FILE HERE
+
 	return 0;
 }
 
@@ -80,6 +154,7 @@ int receive_remote_filename(socket_t* skt, server_t* server){
 	server->block_size = block_size;
 
 	// Open remote file here and assign to server_t
+	server->remote_file = fopen(name, "r");
 
 	free(name);
 
@@ -98,7 +173,7 @@ int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server){
 			socket_receive(skt, (char*)&checksum, sizeof(checksum));
 			checksum = ntohl(checksum);
 			printf("Received checksum %i, of size %lx \n", checksum, sizeof(checksum));
-			checksum_list_append(&(server->checksum_list), checksum);
+			list_append(&(server->checksum_list), checksum);
 		}
 	}
 	return 0;

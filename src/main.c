@@ -8,7 +8,7 @@
 
 #include <string.h>
 #include "client.h"
-#include "lib_checksum.h"
+//#include "lib_checksum.h"
 #include "server.h"
 
 #define CLIENT "client"
@@ -30,26 +30,39 @@ int main(int argc, char *argv[]){
 // CHECKSUM TESTING
 
 //	checksum_t checksum;
-//	char* test_checksum = "ABCDEFG";
-//	set_checksum(&checksum, test_checksum, 3);
+//	char* test_checksum = "xaa";
+//	set_checksum(&checksum, test_checksum, 2);
 //	printf("%lu\n" , checksum.checksum);
 //
-//	char* test_new_checksum = "ABCDEFG";
+//	char* test_new_checksum = "xaa";
 //
 //	checksum_t new_old_checksum;
-//	set_checksum(&new_old_checksum, test_new_checksum + 1, 3);
-//	printf("%lu\n" , new_old_checksum.checksum);
+//	set_checksum(&new_old_checksum, test_new_checksum + 1, 2);
+//	printf("%04x\n" , (unsigned int)new_old_checksum.checksum);
 //
 //	checksum_t new_checksum;
-//	rolling_checksum(&new_checksum, &checksum, test_checksum + 1 , 3);
-//	printf("%lu\n" , new_checksum.checksum);
-
-//	FILE* file = NULL;
-//	open_file(file, "./test_files/remote", "r");
-//	fclose(file);
-//	char* buffer[100];
-//	read(file, buffer, 50);
+//	rolling_checksum(&new_checksum, &checksum, test_checksum + 1 , 2);
+//	printf("%04x\n" , (unsigned int)new_checksum.checksum);
+//
+//	FILE* file = fopen("remote", "r");;
+//	char buffer[100];
+//	memset(buffer, 0, sizeof(buffer));
+//	fread(&buffer, sizeof(char), 2, file);
 //	printf("%s \n", buffer);
+//	fseek(file, -1, SEEK_CUR);
+//	fread(&buffer, sizeof(char), 2, file);
+//	printf("%s \n", buffer);
+//	fseek(file, -1, SEEK_CUR);
+//	fread(&buffer, sizeof(char), 2, file);
+//	printf("%s \n", buffer);
+//	fseek(file, -1, SEEK_CUR);
+//	fread(&buffer, sizeof(char), 2, file);
+//	printf("%s \n", buffer);
+//	fread(&buffer, sizeof(char), 2, file);
+//	printf("%s \n", buffer);
+//	fread(&buffer, sizeof(char), 2, file);
+//	printf("%s \n", buffer);
+//	fclose(file);
 
 	return 0;
 }

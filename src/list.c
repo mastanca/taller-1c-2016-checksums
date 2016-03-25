@@ -1,5 +1,5 @@
 /*
- * checksum_list.c
+ * list.c
  *
  *  Created on: Mar 24, 2016
  *      Author: mastanca
@@ -7,44 +7,45 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "checksum_list.h"
 
-void checksum_list_init(checksum_list_t *checksum_list) {
-	checksum_list->size = 0;
-	checksum_list->capacity = LIST_INITIAL_CAPACITY;
-	checksum_list->data = malloc(sizeof(int) * checksum_list->capacity);
+#include "list.h"
+
+void list_init(list_t *list) {
+	list->size = 0;
+	list->capacity = LIST_INITIAL_CAPACITY;
+	list->data = malloc(sizeof(int) * list->capacity);
 }
 
-void checksum_list_append(checksum_list_t *checksum_list, int value) {
-	checksum_list_double_capacity_if_full(checksum_list);
-	checksum_list->data[checksum_list->size++] = value;
+void list_append(list_t *list, int value) {
+	list_double_capacity_if_full(list);
+	list->data[list->size++] = value;
 }
 
 // Return the block at the given index
-int checksum_list_get(checksum_list_t *checksum_list, int index) {
-	if (index >= checksum_list->size || index < 0) {
-		printf("Index %d out of bounds for checksum_list of size %d\n", index,
-				checksum_list->size);
+int list_get(list_t *list, int index) {
+	if (index >= list->size || index < 0) {
+		printf("Index %d out of bounds for list of size %d\n", index,
+				list->size);
 		return -1;
 	}
-	return checksum_list->data[index];
+	return list->data[index];
 }
 
-void checksum_list_set(checksum_list_t *checksum_list, int index, int value) {
-	while (index >= checksum_list->size) {
-		checksum_list_append(checksum_list, 0);
+void list_set(list_t *list, int index, int value) {
+	while (index >= list->size) {
+		list_append(list, 0);
 	}
 
-	checksum_list->data[index] = value;
+	list->data[index] = value;
 }
 
-void checksum_list_double_capacity_if_full(checksum_list_t *checksum_list) {
-	if (checksum_list->size >= checksum_list->capacity) {
-		checksum_list->capacity *= 2;
-		checksum_list->data = realloc(checksum_list->data, sizeof(int) * checksum_list->capacity);
+void list_double_capacity_if_full(list_t *list) {
+	if (list->size >= list->capacity) {
+		list->capacity *= 2;
+		list->data = realloc(list->data, sizeof(int) * list->capacity);
 	}
 }
 
-void checksum_list_free(checksum_list_t *checksum_list) {
-	free(checksum_list->data);
+void list_free(list_t *list) {
+	free(list->data);
 }

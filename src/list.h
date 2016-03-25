@@ -1,31 +1,31 @@
 /*
- * checksum_list.h
+ * list.h
  *
  *  Created on: Mar 24, 2016
  *      Author: mastanca
  */
 
-#ifndef SRC_CHECKSUM_LIST_H_
-#define SRC_CHECKSUM_LIST_H_
+#ifndef SRC_LIST_H_
+#define SRC_LIST_H_
 
 #define LIST_INITIAL_CAPACITY 100
 
-typedef struct checksum_list {
+typedef struct list {
 	int size;      // slots used so far
 	int capacity;  // total available slots
 	int *data;     // array of integers we're storing
-} checksum_list_t;
+} list_t;
 
-void checksum_list_init(checksum_list_t *checksum_list);
+void list_init(list_t *list);
 
-void checksum_list_append(checksum_list_t *checksum_list, int value);
+void list_append(list_t *list, int value);
 
-int checksum_list_get(checksum_list_t *checksum_list, int index);
+int list_get(list_t *list, int index);
 
-void checksum_list_set(checksum_list_t *checksum_list, int index, int value);
+void list_set(list_t *list, int index, int value);
 
-void checksum_list_double_capacity_if_full(checksum_list_t *checksum_list);
+void list_double_capacity_if_full(list_t *list);
 
-void checksum_list_free(checksum_list_t *checksum_list);
+void list_free(list_t *list);
 
-#endif /* SRC_CHECKSUM_LIST_H_ */
+#endif /* SRC_LIST_H_ */
