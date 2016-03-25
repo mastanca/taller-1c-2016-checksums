@@ -8,11 +8,12 @@
 #ifndef SRC_SERVER_H_
 #define SRC_SERVER_H_
 
-#define CHECKSUM_INDICATOR_STRING "0x01"
 #define CHECKSUM_INDICATOR 0x01
 #define END_OF_LIST 0x02
+#define NEW_BYTES_INDICATOR 0x03
+#define BLOCK_FOUND_INDICATOR 0x04
+#define EOF_INDICATOR 0x05
 #define WINDOW_BYTE_DISPLACEMENT -1
-
 
 #include <stdio.h>
 #include <string.h>
@@ -33,6 +34,8 @@ int receive_remote_filename(socket_t* skt, server_t* server);
 int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server);
 int start_comparison_sequence(server_t* server, socket_t* skt);
 int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, checksum_t* checksum);
-int send_windowed_bytes(list_t* window_out_bytes, server_t* server);
+int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* client_skt);
+int send_found_block_number(socket_t* client_skt, size_t index);
+int send_eof(socket_t* client_skt);
 
 #endif /* SRC_SERVER_H_ */

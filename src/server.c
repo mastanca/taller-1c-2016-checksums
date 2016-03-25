@@ -98,10 +98,11 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 			checksum_not_found((char*)&block, &window_out_bytes, server, &checksum);
 		}else{
 			if (window_out_bytes.size > 0){
-				send_windowed_bytes(&window_out_bytes, server);
+				send_windowed_bytes(&window_out_bytes, server, skt);
 				list_init(&window_out_bytes);
 			}
 			printf("Sending block number %i \n", found_index);
+			send_found_block_number(skt, found_index);
 			read_from_file(server->remote_file, (char*)&block, sizeof(block));
 			set_checksum(&checksum, (char*)&block, sizeof(block));
 		}
@@ -109,10 +110,10 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 	}
 	// If there are remaining windowed bytes send them
 	if (window_out_bytes.size > 0){
-		send_windowed_bytes(&window_out_bytes, server);
+		send_windowed_bytes(&window_out_bytes, server, skt);
 	}
 
-	// SEND END OF FILE HERE
+	send_eof(skt);
 
 	return 0;
 }
@@ -176,11 +177,35 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, 
 	return 0;
 }
 
-int send_windowed_bytes(list_t* window_out_bytes, server_t* server){
+int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* client_skt){
+	char buffer_to_send[window_out_bytes->size];
+	memset(buffer_to_send, 0, sizeof(buffer_to_send));
 	for (int i = 0; i < window_out_bytes->size; ++i) {
 		char i_element = list_get(window_out_bytes, i);
+		strcat(buffer_to_send, &i_element);
 		printf("Sending windowed %c \n", i_element);
 	}
+	int new_bytes_indicator = htonl(NEW_BYTES_INDICATOR);
+	socket_send(client_skt, (char*)&new_bytes_indicator, sizeof(buffer_to_send));
+	// Send 4 bytes with the length of the new bytes
+	int new_bytes_size = htonl(sizeof(buffer_to_send));
+	socket_send(client_skt, (char*)&new_bytes_size, sizeof(new_bytes_size));
+	// Send the actual bytes
+	socket_send(client_skt, buffer_to_send, sizeof(buffer_to_send));
 	list_free(window_out_bytes);
+	return 0;
+}
+
+int send_found_block_number(socket_t* client_skt, size_t index){
+	int block_found_indicator = htonl(BLOCK_FOUND_INDICATOR);
+	socket_send(client_skt, (char*)&block_found_indicator, sizeof(block_found_indicator));
+	int block_number = htonl(index);
+	socket_send(client_skt, (char*)&block_number, sizeof(block_number));
+	return 0;
+}
+
+int send_eof(socket_t* client_skt){
+	int eof_indicator = htonl(EOF_INDICATOR);
+	socket_send(client_skt, (char*)&eof_indicator, sizeof(eof_indicator));
 	return 0;
 }
