@@ -58,6 +58,8 @@ int server_execution(int argc, char* argv[]){
 	if (server.remote_file != NULL)
 		start_comparison_sequence(&server, &client_skt);
 
+	printf("\nExiting...\n");
+
 	socket_destroy(&client_skt);
 	printf("%s \n", "Client destroyed!");
 	socket_destroy(server.skt);
@@ -69,6 +71,8 @@ int server_execution(int argc, char* argv[]){
 }
 
 int start_comparison_sequence(server_t* server, socket_t* skt){
+	printf("\n STARTING COMPARISON SEQUENCE \n\n");
+
 	list_t window_out_bytes;
 	list_init(&window_out_bytes);
 
@@ -101,7 +105,6 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 				send_windowed_bytes(&window_out_bytes, server, skt);
 				list_init(&window_out_bytes);
 			}
-			printf("Sending block number %i \n", found_index);
 			send_found_block_number(skt, found_index);
 			read_from_file(server->remote_file, (char*)&block, sizeof(block));
 			set_checksum(&checksum, (char*)&block, sizeof(block));
@@ -142,7 +145,7 @@ int receive_remote_filename(socket_t* skt, server_t* server){
 }
 
 int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server){
-	printf("%s \n", "Receiving checksum list");
+	printf("\n %s \n\n", "Receiving checksum list");
 	int code;
 	int checksum;
 	while ( code != END_OF_LIST){
@@ -183,14 +186,16 @@ int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* cl
 	for (int i = 0; i < window_out_bytes->size; ++i) {
 		char i_element = list_get(window_out_bytes, i);
 		strcat(buffer_to_send, &i_element);
-		printf("Sending windowed %c \n", i_element);
 	}
 	int new_bytes_indicator = htonl(NEW_BYTES_INDICATOR);
+	printf("Sending code %i \n", NEW_BYTES_INDICATOR);
 	socket_send(client_skt, (char*)&new_bytes_indicator, sizeof(buffer_to_send));
 	// Send 4 bytes with the length of the new bytes
 	int new_bytes_size = htonl(sizeof(buffer_to_send));
+	printf("Sending %lu bytes \n", sizeof(buffer_to_send));
 	socket_send(client_skt, (char*)&new_bytes_size, sizeof(new_bytes_size));
 	// Send the actual bytes
+	printf("Sending %s \n", buffer_to_send);
 	socket_send(client_skt, buffer_to_send, sizeof(buffer_to_send));
 	list_free(window_out_bytes);
 	return 0;
@@ -198,14 +203,17 @@ int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* cl
 
 int send_found_block_number(socket_t* client_skt, size_t index){
 	int block_found_indicator = htonl(BLOCK_FOUND_INDICATOR);
+	printf("Sending code %i \n", BLOCK_FOUND_INDICATOR);
 	socket_send(client_skt, (char*)&block_found_indicator, sizeof(block_found_indicator));
 	int block_number = htonl(index);
+	printf("Sending block number %i \n", (int)index);
 	socket_send(client_skt, (char*)&block_number, sizeof(block_number));
 	return 0;
 }
 
 int send_eof(socket_t* client_skt){
 	int eof_indicator = htonl(EOF_INDICATOR);
+	printf("Sending code %i \n", EOF_INDICATOR);
 	socket_send(client_skt, (char*)&eof_indicator, sizeof(eof_indicator));
 	return 0;
 }
