@@ -8,15 +8,9 @@
 #ifndef SRC_SERVER_H_
 #define SRC_SERVER_H_
 
-#define CHECKSUM_INDICATOR 0x01
-#define END_OF_LIST 0x02
-#define NEW_BYTES_INDICATOR 0x03
-#define BLOCK_FOUND_INDICATOR 0x04
-#define EOF_INDICATOR 0x05
-#define WINDOW_BYTE_DISPLACEMENT -1
-
 #include <stdio.h>
 #include <string.h>
+#include "constants.h"
 #include "lib_socket.h"
 #include "list.h"
 #include "lib_checksum.h"

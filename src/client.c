@@ -25,9 +25,9 @@ int client_execution(int argc, char* argv[]){
 	char* port = argv[3];
 
 	char* old_file_name = argv[4];
-	//char* new_file_name = argv[5];
+	char* new_file_name = argv[5];
 	char* remote_file_name = argv[6];
-	size_t block_size = atoi(argv[7]);
+	client.block_size = atoi(argv[7]);
 
 	socket_t skt;
 	client.skt = &skt;
@@ -36,19 +36,71 @@ int client_execution(int argc, char* argv[]){
 	socket_connect(client.skt);
 	printf("%s \n", "Socket connected!");
 
-	send_remote_filename(client.skt, remote_file_name, block_size);
+	send_remote_filename(client.skt, remote_file_name, client.block_size);
 
 	// Open old file
-	FILE* old_file = NULL;
-	old_file = fopen(old_file_name, "r");
-	if ( old_file != NULL){
-		send_file_chunks(&client, old_file, block_size);
+	client.old_file = NULL;
+	client.old_file = fopen(old_file_name, "r");
+	if ( client.old_file != NULL){
+		send_file_chunks(&client, client.old_file, client.block_size);
 	}
 
+	// Open new file
+	client.new_file = NULL;
+	client.new_file = fopen(new_file_name, "w");
+
+	printf("\n %s \n", "Receving server response...");
+	receive_server_response(&client);
+
 //	play_with_socket(client);
-	fclose(old_file);
+	printf("\n %s \n", "Quiting");
+	fclose(client.old_file);
+	fclose(client.new_file);
 	socket_destroy(client.skt);
 	printf("%s \n", "Socket destroyed!");
+	return 0;
+}
+
+int receive_server_response(client_t* client){
+	// Receive server code
+	int server_code = 0;
+	while (server_code != EOF_INDICATOR){
+		socket_receive(client->skt, (char*)&server_code, sizeof(server_code));
+		server_code = ntohl(server_code);
+
+		if (server_code == NEW_BYTES_INDICATOR){
+			receive_new_bytes(client);
+		} else if (server_code == BLOCK_FOUND_INDICATOR){
+			receive_existing_block(client);
+		}
+	}
+	printf("RECV End of file");
+
+	return 0;
+}
+
+int receive_new_bytes(client_t* client){
+	int new_bytes_longitude = 0;
+	socket_receive(client->skt, (char*)&new_bytes_longitude, sizeof(new_bytes_longitude));
+	new_bytes_longitude = ntohl(new_bytes_longitude);
+	char new_bytes_buffer[new_bytes_longitude];
+	memset(new_bytes_buffer, 0, sizeof(new_bytes_buffer));
+	socket_receive(client->skt, (char*)&new_bytes_buffer, sizeof(new_bytes_buffer));
+	printf("RECV File chunk %lu bytes", sizeof(new_bytes_buffer));
+//	new_bytes_buffer = ntohl(new_bytes_buffer);
+	fwrite(&new_bytes_buffer, sizeof(char), sizeof(new_bytes_buffer), client->new_file);
+	return 0;
+}
+
+int receive_existing_block(client_t* client){
+	int existing_block_index = -1;
+	socket_receive(client->skt, (char*)&existing_block_index, sizeof(existing_block_index));
+	existing_block_index = ntohl(existing_block_index);
+	printf("RECV Block index %i", existing_block_index);
+	fseek(client->old_file, client->block_size * existing_block_index , SEEK_SET);
+	char old_bytes_buffer[client->block_size];
+	read_from_file(client->old_file, old_bytes_buffer, client->block_size);
+	fwrite(&old_bytes_buffer, sizeof(char), sizeof(old_bytes_buffer), client->new_file);
 	return 0;
 }
 

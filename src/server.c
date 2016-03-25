@@ -196,6 +196,7 @@ int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* cl
 	socket_send(client_skt, (char*)&new_bytes_size, sizeof(new_bytes_size));
 	// Send the actual bytes
 	printf("Sending %s \n", buffer_to_send);
+//	buffer_to_send = htonl(buffer_to_send);
 	socket_send(client_skt, buffer_to_send, sizeof(buffer_to_send));
 	list_free(window_out_bytes);
 	return 0;
