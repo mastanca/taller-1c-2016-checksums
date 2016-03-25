@@ -32,5 +32,7 @@ int server_execution(int argc, char* argv[]);
 int receive_remote_filename(socket_t* skt, server_t* server);
 int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server);
 int start_comparison_sequence(server_t* server, socket_t* skt);
+int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, checksum_t* checksum);
+int send_windowed_bytes(list_t* window_out_bytes, server_t* server);
 
 #endif /* SRC_SERVER_H_ */

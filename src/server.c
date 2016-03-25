@@ -95,27 +95,10 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 			i++;
 		}
 		if (!found){
-			char byte_to_window = block[0];
-			list_append(&window_out_bytes, byte_to_window);
-			printf("Saved %c into windowed bytes\n", (char)byte_to_window);
-			fseek(server->remote_file, WINDOW_BYTE_DISPLACEMENT, SEEK_CUR);
-			read_from_file(server->remote_file, (char*)&block, sizeof(block));
-			char rolling_buffer[server->block_size + 1];
-			memset(rolling_buffer, 0, sizeof(rolling_buffer));
-			rolling_buffer[0] = byte_to_window;
-			strcat(rolling_buffer, block);
-			checksum_t old_checksum;
-			old_checksum = checksum;
-			printf("Rolling buffer: %s\n", rolling_buffer);
-			rolling_checksum(&checksum, &old_checksum, (char*)&rolling_buffer +1, server->block_size);
-			printf("Remote rolling checksum of %s: %lx \n", block, checksum.checksum);
+			checksum_not_found((char*)&block, &window_out_bytes, server, &checksum);
 		}else{
 			if (window_out_bytes.size > 0){
-				for (int i = 0; i < window_out_bytes.size; ++i) {
-					char i_element = list_get(&window_out_bytes, i);
-					printf("Sending windowed %c \n", i_element);
-				}
-				list_free(&window_out_bytes);
+				send_windowed_bytes(&window_out_bytes, server);
 				list_init(&window_out_bytes);
 			}
 			printf("Sending block number %i \n", found_index);
@@ -126,11 +109,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 	}
 	// If there are remaining windowed bytes send them
 	if (window_out_bytes.size > 0){
-		for (int i = 0; i < window_out_bytes.size; ++i) {
-			char i_element = list_get(&window_out_bytes, i);
-			printf("Sending windowed %c \n", i_element);
-		}
-		list_free(&window_out_bytes);
+		send_windowed_bytes(&window_out_bytes, server);
 	}
 
 	// SEND END OF FILE HERE
@@ -176,5 +155,32 @@ int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server){
 			list_append(&(server->checksum_list), checksum);
 		}
 	}
+	return 0;
+}
+
+int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, checksum_t* checksum){
+	char byte_to_window = block[0];
+	list_append(window_out_bytes, byte_to_window);
+	printf("Saved %c into windowed bytes\n", (char)byte_to_window);
+	fseek(server->remote_file, WINDOW_BYTE_DISPLACEMENT, SEEK_CUR);
+	read_from_file(server->remote_file, block, server->block_size);
+	char rolling_buffer[server->block_size + 1];
+	memset(rolling_buffer, 0, sizeof(rolling_buffer));
+	rolling_buffer[0] = byte_to_window;
+	strcat(rolling_buffer, block);
+	checksum_t old_checksum;
+	old_checksum = *checksum;
+	printf("Rolling buffer: %s\n", rolling_buffer);
+	rolling_checksum(checksum, &old_checksum, (char*)&rolling_buffer +1, server->block_size);
+	printf("Remote rolling checksum of %s: %lx \n", block, checksum->checksum);
+	return 0;
+}
+
+int send_windowed_bytes(list_t* window_out_bytes, server_t* server){
+	for (int i = 0; i < window_out_bytes->size; ++i) {
+		char i_element = list_get(window_out_bytes, i);
+		printf("Sending windowed %c \n", i_element);
+	}
+	list_free(window_out_bytes);
 	return 0;
 }
