@@ -81,7 +81,11 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 		}
 	}
 	// If there are remaining windowed bytes send them
-	if (window_out_bytes.size > 0){
+	if (window_out_bytes.size > 0 || sizeof(block) > 0){
+		for (int i = 0; i < strlen(block); ++i) {
+			char remaining_char = block[i];
+			list_append(&window_out_bytes, remaining_char);
+		}
 		send_windowed_bytes(&window_out_bytes, server, skt);
 	}
 
@@ -145,21 +149,21 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
 
 int send_windowed_bytes(list_t* window_out_bytes, server_t* server,
 		socket_t* skt){
-	char buffer_to_send[window_out_bytes->size];
-	memset(buffer_to_send, 0, sizeof(buffer_to_send));
+	char* buffer_to_send = calloc(window_out_bytes->size, sizeof(char));
 	for (int i = 0; i < window_out_bytes->size; ++i) {
 		char i_element = list_get(window_out_bytes, i);
-		strncat(buffer_to_send, &i_element, sizeof(i_element));
+		strncat(buffer_to_send, &i_element, sizeof(char));
 	}
 	char new_bytes_indicator = NEW_BYTES_INDICATOR;
 	socket_send(skt, (char*)&new_bytes_indicator, sizeof(new_bytes_indicator));
 
 	// Send 4 bytes with the length of the new bytes
-	int new_bytes_size = sizeof(buffer_to_send);
+	int new_bytes_size = strlen(buffer_to_send);
 	socket_send(skt, (char*)&new_bytes_size, sizeof(new_bytes_size));
 
 	// Send the actual bytes
-	socket_send(skt, buffer_to_send, sizeof(buffer_to_send));
+	socket_send(skt, buffer_to_send, strlen(buffer_to_send));
+	free(buffer_to_send);
 	list_free(window_out_bytes);
 	return EXIT_SUCCESS;
 }
