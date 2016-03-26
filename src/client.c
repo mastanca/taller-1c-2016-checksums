@@ -21,7 +21,7 @@ int client_execution(int argc, char* argv[]){
 	client.skt = &skt;
 	socket_init(client.skt, hostname, port);
 
-	if ( socket_connect(client.skt) == 0){
+	if (socket_connect(client.skt) == 0){
 		// Open new file
 		client.new_file = NULL;
 		client.new_file = fopen(new_file_name, "w");
@@ -31,7 +31,7 @@ int client_execution(int argc, char* argv[]){
 		// Open old file
 		client.old_file = NULL;
 		client.old_file = fopen(old_file_name, "r");
-		if ( client.old_file != NULL){
+		if (client.old_file != NULL){
 			send_file_chunks(&client, client.old_file, client.block_size);
 		}
 
@@ -66,10 +66,11 @@ int receive_server_response(client_t* client){
 
 int receive_new_bytes(client_t* client){
 	int new_bytes_longitude;
-	socket_receive(client->skt, (char*)&new_bytes_longitude, sizeof(new_bytes_longitude));
+	socket_receive(client->skt, (char*)&new_bytes_longitude,
+			sizeof(new_bytes_longitude));
 	// Weird bug when using stack, so malloc!
 	char* new_bytes_buffer = malloc(new_bytes_longitude);
-	strcpy(new_bytes_buffer, "");
+	memset(new_bytes_buffer, 0, strlen(new_bytes_buffer));
 	socket_receive(client->skt, new_bytes_buffer, new_bytes_longitude);
 
 	printf("RECV File chunk %i bytes\n", new_bytes_longitude);
@@ -80,18 +81,22 @@ int receive_new_bytes(client_t* client){
 
 int receive_existing_block(client_t* client){
 	int existing_block_index = -1;
-	socket_receive(client->skt, (char*)&existing_block_index, sizeof(existing_block_index));
+	socket_receive(client->skt, (char*)&existing_block_index,
+			sizeof(existing_block_index));
 
 	printf("RECV Block index %i\n", existing_block_index);
-	fseek(client->old_file, client->block_size * existing_block_index , SEEK_SET);
+	fseek(client->old_file, client->block_size * existing_block_index,
+			SEEK_SET);
 
 	char old_bytes_buffer[client->block_size];
 	read_from_file(client->old_file, old_bytes_buffer, client->block_size);
-	fwrite(&old_bytes_buffer, sizeof(char), sizeof(old_bytes_buffer), client->new_file);
+	fwrite(&old_bytes_buffer, sizeof(char), sizeof(old_bytes_buffer),
+			client->new_file);
 	return EXIT_SUCCESS;
 }
 
-int send_remote_filename(socket_t* skt, char* filename, unsigned int block_size){
+int send_remote_filename(socket_t* skt, char* filename,
+		unsigned int block_size){
 	int filename_length = strlen(filename);
 	char *buffer = malloc(filename_length + 2 * sizeof(int));
 

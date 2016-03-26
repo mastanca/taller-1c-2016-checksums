@@ -20,6 +20,7 @@ typedef struct checksum{
 } checksum_t;
 
 int set_checksum(checksum_t* checksum, char* input, size_t size);
-int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum, char* buffer, size_t size);
+int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum,
+		char* buffer, size_t size);
 
 #endif /* SRC_LIB_CHECKSUM_H_ */

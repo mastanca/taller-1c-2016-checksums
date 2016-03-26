@@ -23,7 +23,8 @@ typedef struct client{
 }client_t;
 
 int client_execution(int argc, char* argv[]);
-int send_remote_filename(socket_t* skt, char* filename, unsigned int block_size);
+int send_remote_filename(socket_t* skt, char* filename,
+		unsigned int block_size);
 int send_file_chunks(client_t* client, FILE* file, unsigned int block_size);
 int receive_new_bytes(client_t* client);
 int receive_existing_block(client_t* client);
