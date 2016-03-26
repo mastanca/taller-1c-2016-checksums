@@ -7,18 +7,6 @@
 
 #include "client.h"
 
-//void play_with_socket(client_t client){
-//	char input[100];
-//	char buffer[100];
-//	while (strcmp(input, "@exit\n") != 0){
-//		memset(&input, 0, sizeof(input));
-//		fgets(input, sizeof(input), stdin);
-//		socket_send(client.skt, input, sizeof(input));
-//		socket_receive(client.skt, buffer, sizeof(buffer));
-//		printf("%s", buffer);
-//	}
-//}
-
 int client_execution(int argc, char* argv[]){
 	client_t client;
 	char* hostname = argv[2];
@@ -32,33 +20,30 @@ int client_execution(int argc, char* argv[]){
 	socket_t skt;
 	client.skt = &skt;
 	socket_init(client.skt, hostname, port);
-	printf("%s \n", "Socket created!");
-	socket_connect(client.skt);
-	printf("%s \n", "Socket connected!");
 
+	if ( socket_connect(client.skt) == 0){
+		// Open new file
+		client.new_file = NULL;
+		client.new_file = fopen(new_file_name, "w");
 
-	// Open new file
-	client.new_file = NULL;
-	client.new_file = fopen(new_file_name, "w");
+		send_remote_filename(client.skt, remote_file_name, client.block_size);
 
-	send_remote_filename(client.skt, remote_file_name, client.block_size);
+		// Open old file
+		client.old_file = NULL;
+		client.old_file = fopen(old_file_name, "r");
+		if ( client.old_file != NULL){
+			send_file_chunks(&client, client.old_file, client.block_size);
+		}
 
-	// Open old file
-	client.old_file = NULL;
-	client.old_file = fopen(old_file_name, "r");
-	if ( client.old_file != NULL){
-		send_file_chunks(&client, client.old_file, client.block_size);
+		receive_server_response(&client);
+
+	//	play_with_socket(client);
+		fclose(client.old_file);
+		fclose(client.new_file);
 	}
 
-	printf("\n %s \n", "Receving server response...");
-	receive_server_response(&client);
 
-//	play_with_socket(client);
-	printf("\n %s \n", "Quiting");
-	fclose(client.old_file);
-	fclose(client.new_file);
 	socket_destroy(client.skt);
-	printf("%s \n", "Socket destroyed!");
 	return EXIT_SUCCESS;
 }
 
@@ -69,10 +54,8 @@ int receive_server_response(client_t* client){
 		socket_receive(client->skt, (char*)&server_code, sizeof(char));
 
 		if (server_code == NEW_BYTES_INDICATOR){
-			printf("\n %s \n", "new bytes");
 			receive_new_bytes(client);
 		} else if (server_code == BLOCK_FOUND_INDICATOR){
-			printf("\n %s \n", "block found");
 			receive_existing_block(client);
 		}
 	}
@@ -89,8 +72,8 @@ int receive_new_bytes(client_t* client){
 	strcpy(new_bytes_buffer, "");
 	socket_receive(client->skt, new_bytes_buffer, new_bytes_longitude);
 
-	printf("RECV File chunk %lu bytes\n", strlen(new_bytes_buffer));
-	fwrite(new_bytes_buffer, sizeof(char), strlen(new_bytes_buffer), client->new_file);
+	printf("RECV File chunk %i bytes\n", new_bytes_longitude);
+	fwrite(new_bytes_buffer, sizeof(char), new_bytes_longitude, client->new_file);
 	free(new_bytes_buffer);
 	return EXIT_SUCCESS;
 }
@@ -130,16 +113,13 @@ int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 		read_from_file(file, buffer, block_size);
 		if (strcmp(buffer, "") != 0) {
 			char code = CHECKSUM_INDICATOR;
-			printf("Sending code %c\n", CHECKSUM_INDICATOR);
 			socket_send(client->skt, (char*)&code, sizeof(code));
 			set_checksum(&checksum, buffer, block_size);
 			int number_to_send = checksum.checksum;
-			printf("Sending %d, this is %lx bytes \n", (int)checksum.checksum, sizeof((int)checksum.checksum));
 			socket_send(client->skt, (char*)&number_to_send, sizeof(number_to_send));
 			memset(buffer, 0, sizeof(buffer));
 		}
 	}
-	printf("Sending code %c\n", END_OF_LIST);
 	int code = END_OF_LIST;
 	socket_send(client->skt, (char*)&code, sizeof(code));
 	return EXIT_SUCCESS;
