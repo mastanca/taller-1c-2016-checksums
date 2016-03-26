@@ -14,7 +14,7 @@
  	memset(tmp_buffer, 0 , sizeof(tmp_buffer));
  	if (!feof(file)){
  		if (fread(tmp_buffer, 1, block_size, file) != 0){
- 			if (strlen(tmp_buffer) == block_size)
+ 			if (strlen(tmp_buffer) <= block_size)
  				strncpy(buffer, tmp_buffer, sizeof(tmp_buffer));
  		}
  	}
