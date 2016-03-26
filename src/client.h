@@ -19,12 +19,12 @@ typedef struct client{
 	socket_t* skt;
 	FILE* old_file;
 	FILE* new_file;
-	size_t block_size;
+	unsigned int block_size;
 }client_t;
 
 int client_execution(int argc, char* argv[]);
-int send_remote_filename(socket_t* skt, char* filename, size_t block_size);
-int send_file_chunks(client_t* client, FILE* file, size_t block_size);
+int send_remote_filename(socket_t* skt, char* filename, unsigned int block_size);
+int send_file_chunks(client_t* client, FILE* file, unsigned int block_size);
 int receive_new_bytes(client_t* client);
 int receive_existing_block(client_t* client);
 int receive_server_response(client_t* client);

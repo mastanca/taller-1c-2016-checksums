@@ -18,18 +18,18 @@
 
 typedef struct server{
 	socket_t* skt;
-	size_t block_size;
+	unsigned int block_size;
 	FILE* remote_file;
 	list_t checksum_list;
 }server_t;
 
 int server_execution(int argc, char* argv[]);
 int receive_remote_filename(socket_t* skt, server_t* server);
-int receive_checksum_list(socket_t* skt, size_t block_size, server_t* server);
+int receive_checksum_list(socket_t* skt, unsigned int block_size, server_t* server);
 int start_comparison_sequence(server_t* server, socket_t* skt);
 int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, checksum_t* checksum);
 int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* client_skt);
-int send_found_block_number(socket_t* client_skt, size_t index);
+int send_found_block_number(socket_t* client_skt, unsigned int index);
 int send_eof(socket_t* client_skt);
 
 #endif /* SRC_SERVER_H_ */
