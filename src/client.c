@@ -59,7 +59,7 @@ int client_execution(int argc, char* argv[]){
 	fclose(client.new_file);
 	socket_destroy(client.skt);
 	printf("%s \n", "Socket destroyed!");
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int receive_server_response(client_t* client){
@@ -78,20 +78,21 @@ int receive_server_response(client_t* client){
 	}
 	printf("RECV End of file\n");
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int receive_new_bytes(client_t* client){
-	int new_bytes_longitude = 0;
+	int new_bytes_longitude;
 	socket_receive(client->skt, (char*)&new_bytes_longitude, sizeof(new_bytes_longitude));
+	// Weird bug when using stack, so malloc!
+	char* new_bytes_buffer = malloc(new_bytes_longitude);
+	strcpy(new_bytes_buffer, "");
+	socket_receive(client->skt, new_bytes_buffer, new_bytes_longitude);
 
-	char new_bytes_buffer[new_bytes_longitude];
-	memset(new_bytes_buffer, 0, sizeof(new_bytes_buffer));
-	socket_receive(client->skt, (char*)&new_bytes_buffer, sizeof(new_bytes_buffer));
-
-	printf("RECV File chunk %lu bytes\n", sizeof(new_bytes_buffer));
-	fwrite(&new_bytes_buffer, sizeof(char), sizeof(new_bytes_buffer), client->new_file);
-	return 0;
+	printf("RECV File chunk %lu bytes\n", strlen(new_bytes_buffer));
+	fwrite(new_bytes_buffer, sizeof(char), strlen(new_bytes_buffer), client->new_file);
+	free(new_bytes_buffer);
+	return EXIT_SUCCESS;
 }
 
 int receive_existing_block(client_t* client){
@@ -104,7 +105,7 @@ int receive_existing_block(client_t* client){
 	char old_bytes_buffer[client->block_size];
 	read_from_file(client->old_file, old_bytes_buffer, client->block_size);
 	fwrite(&old_bytes_buffer, sizeof(char), sizeof(old_bytes_buffer), client->new_file);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int send_remote_filename(socket_t* skt, char* filename, unsigned int block_size){
@@ -119,7 +120,7 @@ int send_remote_filename(socket_t* skt, char* filename, unsigned int block_size)
 
 	free(buffer);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
@@ -141,7 +142,7 @@ int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 	printf("Sending code %c\n", END_OF_LIST);
 	int code = END_OF_LIST;
 	socket_send(client->skt, (char*)&code, sizeof(code));
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 

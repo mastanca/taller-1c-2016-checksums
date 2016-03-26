@@ -24,45 +24,8 @@ int main(int argc, char *argv[]){
 	}else if(strcmp(execution_type, SERVER) == 0){
 		return server_execution(argc, argv);
 	} else {
-		return 1;
+		return EXIT_FAILURE;
 	}
 
-// CHECKSUM TESTING
-
-//	checksum_t checksum;
-//	char* test_checksum = "xaa";
-//	set_checksum(&checksum, test_checksum, 2);
-//	printf("%lu\n" , checksum.checksum);
-//
-//	char* test_new_checksum = "xaa";
-//
-//	checksum_t new_old_checksum;
-//	set_checksum(&new_old_checksum, test_new_checksum + 1, 2);
-//	printf("%04x\n" , (unsigned int)new_old_checksum.checksum);
-//
-//	checksum_t new_checksum;
-//	rolling_checksum(&new_checksum, &checksum, test_checksum + 1 , 2);
-//	printf("%04x\n" , (unsigned int)new_checksum.checksum);
-//
-//	FILE* file = fopen("remote", "r");;
-//	char buffer[100];
-//	memset(buffer, 0, sizeof(buffer));
-//	fread(&buffer, sizeof(char), 2, file);
-//	printf("%s \n", buffer);
-//	fseek(file, -1, SEEK_CUR);
-//	fread(&buffer, sizeof(char), 2, file);
-//	printf("%s \n", buffer);
-//	fseek(file, -1, SEEK_CUR);
-//	fread(&buffer, sizeof(char), 2, file);
-//	printf("%s \n", buffer);
-//	fseek(file, -1, SEEK_CUR);
-//	fread(&buffer, sizeof(char), 2, file);
-//	printf("%s \n", buffer);
-//	fread(&buffer, sizeof(char), 2, file);
-//	printf("%s \n", buffer);
-//	fread(&buffer, sizeof(char), 2, file);
-//	printf("%s \n", buffer);
-//	fclose(file);
-
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -35,7 +35,7 @@ int socket_init (socket_t* skt, char* hostname, char* port){
 		handle_error("init");
 		return 1;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int socket_destroy (socket_t* skt){
@@ -47,7 +47,7 @@ int socket_destroy (socket_t* skt){
 		handle_error("destroy (close)");
 		return 1;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int socket_bind (socket_t* skt){
@@ -58,7 +58,7 @@ int socket_bind (socket_t* skt){
 		return 1;
 	}
 	freeaddrinfo(skt->result);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int socket_listen (socket_t* skt, int max_clients) {
@@ -66,7 +66,7 @@ int socket_listen (socket_t* skt, int max_clients) {
 		handle_error("listen");
 		return 1;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int socket_accept (socket_t* skt, socket_t* client_skt) {
@@ -75,7 +75,7 @@ int socket_accept (socket_t* skt, socket_t* client_skt) {
 		handle_error("accept");
 		return 1;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int socket_connect (socket_t* skt) {
@@ -93,9 +93,9 @@ int socket_connect (socket_t* skt) {
 	}
 	freeaddrinfo(skt->result);
 	if (are_we_connected == false){
-		return 1;
+		return EXIT_FAILURE;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int socket_receive (socket_t* skt, char* buffer, int size) {
@@ -121,10 +121,10 @@ int socket_receive (socket_t* skt, char* buffer, int size) {
 		printf("Received %d bytes\n", received);
 		return received;
 	} else {
-		return -1;
+		return -EXIT_FAILURE;
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int socket_send (socket_t* skt, char* buffer, int size) {
@@ -150,15 +150,15 @@ int socket_send (socket_t* skt, char* buffer, int size) {
 		printf("Sent %d bytes\n", sent);
 		return sent;
 	} else {
-		return -1;
+		return -EXIT_FAILURE;
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int handle_error(char* function_name){
 	fprintf(stderr, "Error on %s: ", function_name);
 	fprintf(stderr, "%s\n", strerror(errno));
-	return 0;
+	return EXIT_SUCCESS;
 }
 

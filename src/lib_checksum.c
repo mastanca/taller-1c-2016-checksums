@@ -7,19 +7,20 @@
 
 #include "lib_checksum.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 static int checksum_init(checksum_t* checksum){
 	checksum->lower = 0;
 	checksum->higher = 0;
 	checksum->checksum = 0;
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 static int set_checksum_result(checksum_t* checksum){
 	checksum->lower %= M;
 	checksum->higher %= M;
 	checksum->checksum = checksum->lower + checksum->higher*M;
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 // Stores the resulting checksum in checksum arg
@@ -33,7 +34,7 @@ int set_checksum(checksum_t* checksum, char* input, size_t size){
 
 	set_checksum_result(checksum);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 // Rolling checksum assumes buffer is contiguous in memory
@@ -45,6 +46,6 @@ int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum, char* b
 
 	set_checksum_result(new_checksum);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 

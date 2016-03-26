@@ -7,19 +7,6 @@
 
 #include "server.h"
 
-//static void play_with_socket(server_t server, socket_t* client_skt){
-//	char buffer[100];
-//	while (strcmp(buffer, "@exit\n") != 0){
-//		memset(&buffer, 0, sizeof(buffer));
-//		socket_receive(client_skt, buffer, sizeof(buffer));
-//		if (strcmp(buffer, "@exit\n") != 0){
-//			strcat(buffer, "gato\n");
-//			socket_send(client_skt, buffer, sizeof(buffer));
-//			printf("Sent %i bytes\n", (int)strlen(buffer));
-//		}
-//	}
-//}
-
 int server_execution(int argc, char* argv[]){
 	if (argc != 3){
 		return 1;
@@ -49,15 +36,7 @@ int server_execution(int argc, char* argv[]){
 	receive_remote_filename(&client_skt, &server);
 
 	receive_checksum_list(&client_skt, server.block_size, &server);
-//	printf("Printing list \n");
-//	for (int var = 0; var < server.list.size; ++var) {
-//		int temp = list_get(&server.list,var);
-//		printf("%i \n", temp);
-//	}
-//	play_with_socket(server, &client_skt);
 
-//
-//	if (server.remote_file != NULL)
 	start_comparison_sequence(&server, &client_skt);
 
 	socket_destroy(&client_skt);
@@ -67,7 +46,7 @@ int server_execution(int argc, char* argv[]){
 	fclose(server.remote_file);
 	// Free checksum list
 	list_free(&server.checksum_list);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int start_comparison_sequence(server_t* server, socket_t* skt){
@@ -118,7 +97,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 
 	send_eof(skt);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int receive_remote_filename(socket_t* skt, server_t* server){
@@ -141,7 +120,7 @@ int receive_remote_filename(socket_t* skt, server_t* server){
 
 	free(name);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int receive_checksum_list(socket_t* skt, unsigned int block_size, server_t* server){
@@ -157,7 +136,7 @@ int receive_checksum_list(socket_t* skt, unsigned int block_size, server_t* serv
 			list_append(&(server->checksum_list), checksum);
 		}
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, checksum_t* checksum){
@@ -175,7 +154,7 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, 
 	printf("Rolling buffer: %s\n", rolling_buffer);
 	rolling_checksum(checksum, &old_checksum, (char*)&rolling_buffer +1, server->block_size);
 	printf("Remote rolling checksum of %s: %lx \n", block, checksum->checksum);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* skt){
@@ -188,16 +167,17 @@ int send_windowed_bytes(list_t* window_out_bytes, server_t* server, socket_t* sk
 	char new_bytes_indicator = NEW_BYTES_INDICATOR;
 	printf("Sending code %c \n", NEW_BYTES_INDICATOR);
 	socket_send(skt, (char*)&new_bytes_indicator, sizeof(new_bytes_indicator));
+
 	// Send 4 bytes with the length of the new bytes
 	int new_bytes_size = sizeof(buffer_to_send);
 	printf("Sending %lu of buffer size \n", sizeof(buffer_to_send));
 	socket_send(skt, (char*)&new_bytes_size, sizeof(new_bytes_size));
+
 	// Send the actual bytes
 	printf("Sending %s \n", buffer_to_send);
-//	buffer_to_send = htonl(buffer_to_send);
 	socket_send(skt, buffer_to_send, sizeof(buffer_to_send));
 	list_free(window_out_bytes);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int send_found_block_number(socket_t* skt, unsigned int index){
@@ -207,13 +187,12 @@ int send_found_block_number(socket_t* skt, unsigned int index){
 	int block_number = index;
 	printf("Sending block number %i \n", (int)index);
 	socket_send(skt, (char*)&block_number, sizeof(block_number));
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int send_eof(socket_t* skt){
 	char eof_indicator = EOF_INDICATOR;
-//	int eof_indicator = EOF_INDICATOR;
 	printf("Sending code %c \n", EOF_INDICATOR);
 	socket_send(skt, (char*)&eof_indicator, sizeof(eof_indicator));
-	return 0;
+	return EXIT_SUCCESS;
 }

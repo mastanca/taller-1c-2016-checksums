@@ -6,6 +6,7 @@
  */
 
 #include "file_handler.h"
+#include <stdlib.h>
 
 // Reads block_size chars from file and return result in buffer
 int read_from_file(FILE* file, char* buffer, size_t block_size){
@@ -17,7 +18,7 @@ int read_from_file(FILE* file, char* buffer, size_t block_size){
 		if (strlen(tmp_buffer) == block_size)
 			strcpy(buffer, tmp_buffer);
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 
