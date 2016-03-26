@@ -65,12 +65,12 @@ int receive_server_response(client_t* client){
 }
 
 int receive_new_bytes(client_t* client){
-	int new_bytes_longitude;
+	int new_bytes_longitude = 0;
 	socket_receive(client->skt, (char*)&new_bytes_longitude,
 			sizeof(new_bytes_longitude));
 	// Weird bug when using stack, so malloc!
 	char* new_bytes_buffer = malloc(new_bytes_longitude);
-	memset(new_bytes_buffer, 0, strlen(new_bytes_buffer));
+	memset(new_bytes_buffer, 0, new_bytes_longitude);
 	socket_receive(client->skt, new_bytes_buffer, new_bytes_longitude);
 
 	printf("RECV File chunk %i bytes\n", new_bytes_longitude);
