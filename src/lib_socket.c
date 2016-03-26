@@ -157,8 +157,8 @@ int socket_send(socket_t* skt, char* buffer, int size) {
 }
 
 int handle_error(char* function_name){
-	fprintf(stderr, "Error on %s: ", function_name);
-	fprintf(stderr, "%s\n", strerror(errno));
+//	fprintf(stderr, "Error on %s: ", function_name);
+//	fprintf(stderr, "%s\n", strerror(errno));
 	return EXIT_SUCCESS;
 }
 
