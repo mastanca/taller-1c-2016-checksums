@@ -83,7 +83,6 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 		}else{
 			if (window_out_bytes.size > 0){
 				send_windowed_bytes(&window_out_bytes, server, skt);
-				list_init(&window_out_bytes);
 			}
 			send_found_block_number(skt, found_index);
 			read_from_file(server->remote_file, block, strlen(block),
@@ -101,6 +100,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 		send_windowed_bytes(&window_out_bytes, server, skt);
 	}
 	free(block);
+	list_free(&window_out_bytes);
 	send_eof(skt);
 
 	return EXIT_SUCCESS;
@@ -188,6 +188,7 @@ int send_windowed_bytes(list_t* window_out_bytes, server_t* server,
 	socket_send(skt, buffer_to_send, strlen(buffer_to_send));
 	free(buffer_to_send);
 	list_free(window_out_bytes);
+	list_init(window_out_bytes);
 	return EXIT_SUCCESS;
 }
 
