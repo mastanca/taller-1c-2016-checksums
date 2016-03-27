@@ -15,7 +15,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-int read_from_file(FILE* file, char* buffer, size_t block_size, bool* read_something);
+int read_from_file(FILE* file, char* buffer, size_t block_size,
+   bool* read_something);
 
 
 #endif /* SRC_FILE_HANDLER_H_ */

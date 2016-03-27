@@ -8,7 +8,8 @@
  #include "file_handler.h"
 
  // Reads block_size chars from file and return result in buffer
- int read_from_file(FILE* file, char* buffer, size_t block_size, bool* read_something){
+ int read_from_file(FILE* file, char* buffer, size_t block_size,
+    bool* read_something){
 	 *read_something = false;
 	char* tmp_buffer = calloc(block_size, sizeof(char));
  	if (!feof(file)){

@@ -77,12 +77,14 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 				list_init(&window_out_bytes);
 			}
 			send_found_block_number(skt, found_index);
-			read_from_file(server->remote_file, (char*)&block, sizeof(block), &read_something);
+			read_from_file(server->remote_file, (char*)&block, sizeof(block),
+			 &read_something);
 			set_checksum(&checksum, (char*)&block, sizeof(block));
 		}
 	}
 	// If there are remaining windowed bytes send them
-	if (window_out_bytes.size > 0 || ((sizeof(block) > 0) && (read_something == true))){
+	if (window_out_bytes.size > 0 || ((sizeof(block) > 0) &&
+	 (read_something == true))){
 		for (int i = 0; i < strlen(block); ++i) {
 			char remaining_char = block[i];
 			list_append(&window_out_bytes, remaining_char);
@@ -136,10 +138,12 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
 	char byte_to_window = block[0];
 	list_append(window_out_bytes, byte_to_window);
 	// Move cursor block size bytes to the left and return 1
-	int index = WINDOW_BYTE_DISPLACEMENT * (server->block_size) + (-1 * WINDOW_BYTE_DISPLACEMENT);
+	int index = WINDOW_BYTE_DISPLACEMENT * (server->block_size) +
+	 (-1 * WINDOW_BYTE_DISPLACEMENT);
 	fseek(server->remote_file, index, SEEK_CUR);
 	bool read_something = false;
-	read_from_file(server->remote_file, block, server->block_size, &read_something);
+	read_from_file(server->remote_file, block, server->block_size,
+		 &read_something);
 	char rolling_buffer[server->block_size + 1];
 	memset(rolling_buffer, 0, sizeof(rolling_buffer));
 	rolling_buffer[0] = byte_to_window;
@@ -174,7 +178,8 @@ int send_windowed_bytes(list_t* window_out_bytes, server_t* server,
 
 int send_found_block_number(socket_t* skt, unsigned int index){
 	char block_found_indicator = BLOCK_FOUND_INDICATOR;
-	socket_send(skt, (char*)&block_found_indicator, sizeof(block_found_indicator));
+	socket_send(skt, (char*)&block_found_indicator,
+	 sizeof(block_found_indicator));
 	int block_number = index;
 	socket_send(skt, (char*)&block_number, sizeof(block_number));
 	return EXIT_SUCCESS;
