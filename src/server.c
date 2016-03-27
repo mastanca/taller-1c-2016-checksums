@@ -45,12 +45,13 @@ int server_execution(int argc, char* argv[]){
 }
 
 int start_comparison_sequence(server_t* server, socket_t* skt){
+	bool read_something = false;
 	list_t window_out_bytes;
 	list_init(&window_out_bytes);
 
 	// Load new block from file
 	char block[server->block_size];
-	read_from_file(server->remote_file, block, sizeof(block));
+	read_from_file(server->remote_file, block, sizeof(block), &read_something);
 
 	// Get checksum of the new block
 	checksum_t checksum;
@@ -76,12 +77,12 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 				list_init(&window_out_bytes);
 			}
 			send_found_block_number(skt, found_index);
-			read_from_file(server->remote_file, (char*)&block, sizeof(block));
+			read_from_file(server->remote_file, (char*)&block, sizeof(block), &read_something);
 			set_checksum(&checksum, (char*)&block, sizeof(block));
 		}
 	}
 	// If there are remaining windowed bytes send them
-	if (window_out_bytes.size > 0 || sizeof(block) > 0){
+	if (window_out_bytes.size > 0 || ((sizeof(block) > 0) && (read_something == true))){
 		for (int i = 0; i < strlen(block); ++i) {
 			char remaining_char = block[i];
 			list_append(&window_out_bytes, remaining_char);
@@ -135,7 +136,8 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
 	char byte_to_window = block[0];
 	list_append(window_out_bytes, byte_to_window);
 	fseek(server->remote_file, WINDOW_BYTE_DISPLACEMENT, SEEK_CUR);
-	read_from_file(server->remote_file, block, server->block_size);
+	bool read_something = false;
+	read_from_file(server->remote_file, block, server->block_size, &read_something);
 	char rolling_buffer[server->block_size + 1];
 	memset(rolling_buffer, 0, sizeof(rolling_buffer));
 	rolling_buffer[0] = byte_to_window;

@@ -89,9 +89,11 @@ int receive_existing_block(client_t* client){
 			SEEK_SET);
 
 	char old_bytes_buffer[client->block_size];
-	read_from_file(client->old_file, old_bytes_buffer, client->block_size);
+	bool read_something = false;
+	read_from_file(client->old_file, old_bytes_buffer, client->block_size,
+		 &read_something);
 	fwrite(&old_bytes_buffer, sizeof(char), sizeof(old_bytes_buffer),
-			client->new_file);
+	 client->new_file);
 	return EXIT_SUCCESS;
 }
 
@@ -112,10 +114,11 @@ int send_remote_filename(socket_t* skt, char* filename,
 }
 
 int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
+	bool read_something = false;
 	checksum_t checksum;
 	char buffer[block_size];
 	while(!feof(file)){
-		read_from_file(file, buffer, block_size);
+		read_from_file(file, buffer, block_size, &read_something);
 		if (strcmp(buffer, "") != 0) {
 			char code = CHECKSUM_INDICATOR;
 			socket_send(client->skt, (char*)&code, sizeof(code));
