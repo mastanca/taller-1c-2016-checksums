@@ -17,7 +17,11 @@ int server_execution(int argc, char* argv[]){
 	server.skt = &acep;
 
 	list_t list;
-	server.checksum_list= list;
+	// Compiler warning if this values are not zero before list init
+	list.capacity = 0;
+	list.size = 0;
+	list.data = NULL;
+	server.checksum_list = list;
 	list_init(&server.checksum_list);
 
 	socket_init(server.skt, NULL, port);
