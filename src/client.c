@@ -93,7 +93,7 @@ int receive_existing_block(client_t* client){
 	bool read_something = false;
 	read_from_file(client->old_file, old_bytes_buffer, client->block_size,
 		 &read_something);
-	fwrite(&old_bytes_buffer, sizeof(char), strlen(old_bytes_buffer),
+	fwrite(old_bytes_buffer, sizeof(char), strlen(old_bytes_buffer),
 	 client->new_file);
 	 free(old_bytes_buffer);
 	return EXIT_SUCCESS;
