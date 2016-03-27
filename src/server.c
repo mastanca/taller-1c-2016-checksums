@@ -63,7 +63,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 
 	// Load new block from file
 	char* block = calloc(server->block_size + 1, sizeof(char));
-	read_from_file(server->remote_file, block, strlen(block), &read_something);
+	read_from_file(server->remote_file, block, server->block_size, &read_something);
 
 	// Get checksum of the new block
 	checksum_t checksum;
