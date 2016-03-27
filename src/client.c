@@ -21,8 +21,12 @@ int client_execution(int argc, char* argv[]){
 	socket_t skt;
 	client.skt = &skt;
 	socket_init(client.skt, hostname, port);
+	printf("%s \n", "Socket created!");
+
 
 	if (socket_connect(client.skt) == 0){
+		printf("%s \n", "Socket connected!");
+
 		// Open new file
 		client.new_file = NULL;
 		client.new_file = fopen(new_file_name, "w");
@@ -36,13 +40,17 @@ int client_execution(int argc, char* argv[]){
 			send_file_chunks(&client, client.old_file, client.block_size);
 		}
 
+		printf("\n %s \n", "Receving server response...");
 		receive_server_response(&client);
 
 	//	play_with_socket(client);
+	printf("\n %s \n", "Quiting");
+
 		fclose(client.old_file);
 		fclose(client.new_file);
 	}
 
+	printf("%s \n", "Socket destroyed!");
 
 	socket_destroy(client.skt);
 	return EXIT_SUCCESS;
@@ -55,11 +63,17 @@ int receive_server_response(client_t* client){
 		socket_receive(client->skt, (char*)&server_code, sizeof(char));
 
 		if (server_code == NEW_BYTES_INDICATOR){
+			printf("\n %s \n", "new bytes");
+
 			receive_new_bytes(client);
 		} else if (server_code == BLOCK_FOUND_INDICATOR){
+			printf("\n %s \n", "block found");
+
 			receive_existing_block(client);
 		}
 	}
+	printf("RECV End of file\n");
+
 	printf("RECV End of file\n");
 
 	return EXIT_SUCCESS;
@@ -123,13 +137,19 @@ int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 		read_from_file(file, buffer, block_size, &read_something);
 		if (strcmp(buffer, "") != 0) {
 			char code = CHECKSUM_INDICATOR;
+			printf("Sending code %c\n", CHECKSUM_INDICATOR);
+
 			socket_send(client->skt, (char*)&code, sizeof(code));
 			set_checksum(&checksum, buffer, block_size);
 			int number_to_send = checksum.checksum;
+			printf("Sending %d, this is %lx bytes \n", (int)checksum.checksum, sizeof((int)checksum.checksum));
+
 			socket_send(client->skt, (char*)&number_to_send, sizeof(number_to_send));
 			memset(buffer, 0, strlen(buffer));
 		}
 	}
+	printf("Sending code %c\n", END_OF_LIST);
+
 	int code = END_OF_LIST;
 	socket_send(client->skt, (char*)&code, sizeof(code));
 	free(buffer);

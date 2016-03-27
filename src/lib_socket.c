@@ -120,6 +120,8 @@ int socket_receive(socket_t* skt, char* buffer, int size) {
 	}
 
 	if (is_a_valid_socket) {
+		printf("Received %d bytes\n", received);
+
 		return received;
 	} else {
 		return -EXIT_FAILURE;
@@ -148,6 +150,8 @@ int socket_send(socket_t* skt, char* buffer, int size) {
 	}
 
 	if (is_a_valid_socket) {
+		printf("Sent %d bytes\n", sent);
+
 		return sent;
 	} else {
 		return -EXIT_FAILURE;
