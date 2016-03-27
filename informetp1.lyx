@@ -1,0 +1,322 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language spanish-mexico
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement H
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Informe de Trabajo Practico Nº 1
+\end_layout
+
+\begin_layout Standard
+\align center
+75.42 Taller de Programación I 
+\end_layout
+
+\begin_layout Standard
+\align center
+Cátedra Veiga
+\end_layout
+
+\begin_layout Standard
+\align center
+Facultad de Ingeniera - UBA
+\end_layout
+
+\begin_layout Standard
+\align center
+Autor: Martín Stancanelli
+\end_layout
+
+\begin_layout Standard
+\align center
+Padrón: 95188
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Objetivo
+\end_layout
+
+\begin_layout Standard
+El objetivo del trabajo practico fue utilizar los conociemientos obtenidos
+ en las clases de sockets y TDAs.
+ Para ello se usaron las librerias de socket provistas por el entorno y
+ se desarrollaron un conjunto de TDAs que se explicaran en secciones posteriores.
+\end_layout
+
+\begin_layout Section*
+Configuración del entorno
+\end_layout
+
+\begin_layout Standard
+El entorno de trabajo elegido para la realización del trabajo practico fue
+ una PC con SO Linux Mint 17.3 y compilador gcc 4.8 configurado para utilizar
+ el estándar de C99.
+ 
+\end_layout
+
+\begin_layout Section*
+Explicacion de enunciado
+\end_layout
+
+\begin_layout Standard
+El trabajo consiste en realizar un sistema que haga una sincronizacion de
+ archivos entre un cliente y un servidor.
+ El cliente tendra una copia local de un archivo y el servidor una nueva
+ version del mismo.
+ El objetivo es que el cliente notifique al servidor el archivo que tiene
+ a traves de checksums de bloques de bytes utilizando una variante del 
+\emph on
+Adler32.
+ 
+\end_layout
+
+\begin_layout Standard
+El servidor recibe los checksums del cliente y compara contra los checksums
+ de su archivo remoto.
+ Para los que coincidan se le notifcara al cliente el bloque para el cual
+ el checksum coincide, evitando asi reenviar todo el checksum y reutilizando
+ el archivo local del cliente.
+ En caso de que haya un bloque nuevo se le enviara al cliente los nuevos
+ bytes que debe agregar a su archivo.
+ Finalmente el cliente escribe en un nuevo archivo los datos que ya tenia
+ y los que recibe del lado del servidor.
+\end_layout
+
+\begin_layout Section*
+Desarrollo
+\end_layout
+
+\begin_layout Standard
+A continuacion se detallara el algoritmo mas complejo del trabajo, el cual
+ es como el servidor compara los checksums recibidos con los de su archivo
+ remoto y notifica al cliente.
+\end_layout
+
+\begin_layout Standard
+En primer lugar el servidor abre su archivo local(
+\emph on
+target
+\emph default
+).
+ Carga el primer bloque del archivo en memoria y le calcula su checksum
+ usando la variante de 
+\emph on
+Adler32.
+ 
+\emph default
+Seguido de esto comienza a iterar.
+ En caso de que el checksum no este en la lista de checksums que recibio
+ del cliente, desplaza la ventana de lectura del target en 1 byte y guarda
+ el byte que quedo fuera de la ventana en un buffer.
+ A continuacion calcula el 
+\emph on
+rolling checksum
+\emph default
+ del nuevo bloque y reinicia la iteracion.
+\end_layout
+
+\begin_layout Standard
+En el caso en que el checksum este en la lista de checksums que el cliente
+ le envio, entonces se fija si tiene bytes que hayan sido desplazados de
+ la ventana y guardados en el buffer.
+ Si hay entonces le envia esos bytes al cliente.
+ Si no hay bytes desplazados entonces envia al cliente el numero de bloque
+ que este tiene en su archivo local para el cual el checksum del archivo
+ target coincide.
+ Para terminar mueve la ventana de lectura en un bloque, le calcula su checksum
+ y reinicia la iteracion.
+\end_layout
+
+\begin_layout Standard
+Se inlcuye un diagrama explicando como fluyen la salida y entrada de los
+ programas a través de los 3 file descriptors básicos de Unix.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/mastanca/Desktop/stdfigs.png
+	width 100text%
+	groupId common_image
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Diagrama file descriptors Unix
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Conclusión
+\end_layout
+
+\begin_layout Standard
+El trabajo practico sirvió para tomar conocimiento de los lineamientos que
+ se van a seguir a la hora de la corrección de los trabajos prácticos durante
+ la cursada de la materia.
+\end_layout
+
+\begin_layout Standard
+Además tomamos un primer contacto con el sistema de corrección automática,
+ lo cual es importante para tener un mejor dominio del mismo en futuras
+ entregas.
+\end_layout
+
+\begin_layout Standard
+El poder descargarse las pruebas que son ejecutadas por el sistema para
+ poder correrlas en forma local es de gran ayuda para verificar que lo hecho
+ en el trabajo practico este cumpliendo con las expectativas mínimas del
+ sistema.
+\end_layout
+
+\begin_layout Subsection*
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\begin_inset Newline linebreak
+\end_inset
+
+Salida entrega final
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset External
+	template PDFPages
+	filename ../taller-1c-2016-tp0/salidaEntregaTp0.pdf
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
