@@ -167,7 +167,7 @@ A continuacion se detallara el algoritmo mas complejo del trabajo, el cual
 \end_layout
 
 \begin_layout Standard
-En primer lugar el servidor abre su archivo local(
+En primer lugar el servidor abre su archivo local (
 \emph on
 target
 \emph default
@@ -185,6 +185,19 @@ Seguido de esto comienza a iterar.
  A continuacion calcula el 
 \emph on
 rolling checksum
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+Se calcula el rolling checksum ya que es mas eficiente que volver a calcular
+ el checksum del bloque entero
+\end_layout
+
+\end_inset
+
+
 \emph default
  del nuevo bloque y reinicia la iteracion.
 \end_layout
@@ -199,11 +212,21 @@ En el caso en que el checksum este en la lista de checksums que el cliente
  target coincide.
  Para terminar mueve la ventana de lectura en un bloque, le calcula su checksum
  y reinicia la iteracion.
+\begin_inset Newline newline
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Se inlcuye un diagrama explicando como fluyen la salida y entrada de los
- programas a través de los 3 file descriptors básicos de Unix.
+Se inlcuye un diagrama de estados 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "fig:Diagrama-de-estados"
+
+\end_inset
+
+ explicando el flujo de este algoritmo
 \end_layout
 
 \begin_layout Standard
@@ -211,10 +234,6 @@ Se inlcuye un diagrama explicando como fluyen la salida y entrada de los
 wide false
 sideways false
 status open
-
-\begin_layout Plain Layout
-
-\end_layout
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -241,7 +260,14 @@ centering
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Diagrama file descriptors Unix
+Diagrama de estados
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Diagrama-de-estados"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -263,22 +289,13 @@ Conclusión
 \end_layout
 
 \begin_layout Standard
-El trabajo practico sirvió para tomar conocimiento de los lineamientos que
- se van a seguir a la hora de la corrección de los trabajos prácticos durante
- la cursada de la materia.
-\end_layout
-
-\begin_layout Standard
-Además tomamos un primer contacto con el sistema de corrección automática,
- lo cual es importante para tener un mejor dominio del mismo en futuras
- entregas.
-\end_layout
-
-\begin_layout Standard
-El poder descargarse las pruebas que son ejecutadas por el sistema para
- poder correrlas en forma local es de gran ayuda para verificar que lo hecho
- en el trabajo practico este cumpliendo con las expectativas mínimas del
- sistema.
+En este trabajo se utilizaron conocimientos nuevos, aprendidos en las clases
+ de la materia, sobre sockets y se reutilizaron algunos como los de TDAs
+ que habiamos incorporado de materias anteriores.
+ Si bien al principio el problema de los sockets puede ser un poco complejo,
+ una correcta utilizacion de TDAs y por ende un correcto encapsulamiento
+ permite que nos podamos enfocar de lleno en lo mas importante del enunciado
+ del trabajo practico, como lo es la sincronizacion de archivos.
 \end_layout
 
 \begin_layout Subsection*
@@ -286,32 +303,13 @@ El poder descargarse las pruebas que son ejecutadas por el sistema para
 \end_inset
 
 
-\begin_inset Newline linebreak
-\end_inset
-
-Salida entrega final
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-placement h
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
 \begin_inset External
 	template PDFPages
-	filename ../taller-1c-2016-tp0/salidaEntregaTp0.pdf
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
+	filename 95188-ej1.1.2016-03-27-1658.pdf
+	extra LaTeX "pages=-"
 
 \end_inset
 
