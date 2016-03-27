@@ -50,12 +50,12 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 	list_init(&window_out_bytes);
 
 	// Load new block from file
-	char block[server->block_size];
-	read_from_file(server->remote_file, block, sizeof(block), &read_something);
+	char* block = calloc(server->block_size, sizeof(char));
+	read_from_file(server->remote_file, block, strlen(block), &read_something);
 
 	// Get checksum of the new block
 	checksum_t checksum;
-	set_checksum(&checksum, (char*)&block, sizeof(block));
+	set_checksum(&checksum, block, strlen(block));
 
 	while(!feof(server->remote_file)){
 		int i = 0;
@@ -70,20 +70,20 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 			i++;
 		}
 		if (!found){
-			checksum_not_found((char*)&block, &window_out_bytes, server, &checksum);
+			checksum_not_found(block, &window_out_bytes, server, &checksum);
 		}else{
 			if (window_out_bytes.size > 0){
 				send_windowed_bytes(&window_out_bytes, server, skt);
 				list_init(&window_out_bytes);
 			}
 			send_found_block_number(skt, found_index);
-			read_from_file(server->remote_file, (char*)&block, sizeof(block),
+			read_from_file(server->remote_file, block, strlen(block),
 			 &read_something);
-			set_checksum(&checksum, (char*)&block, sizeof(block));
+			set_checksum(&checksum, block, strlen(block));
 		}
 	}
 	// If there are remaining windowed bytes send them
-	if (window_out_bytes.size > 0 || ((sizeof(block) > 0) &&
+	if (window_out_bytes.size > 0 || ((strlen(block) > 0) &&
 	 (read_something == true))){
 		for (int i = 0; i < strlen(block); ++i) {
 			char remaining_char = block[i];
@@ -91,7 +91,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 		}
 		send_windowed_bytes(&window_out_bytes, server, skt);
 	}
-
+	free(block);
 	send_eof(skt);
 
 	return EXIT_SUCCESS;
@@ -144,13 +144,13 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
 	bool read_something = false;
 	read_from_file(server->remote_file, block, server->block_size,
 		 &read_something);
-	char rolling_buffer[server->block_size + 1];
-	memset(rolling_buffer, 0, sizeof(rolling_buffer));
+	char* rolling_buffer = calloc(server->block_size + 1, sizeof(char));
+	memset(rolling_buffer, 0, strlen(rolling_buffer));
 	rolling_buffer[0] = byte_to_window;
 	strncat(rolling_buffer, block, strlen(block));
 	checksum_t old_checksum;
 	old_checksum = *checksum;
-	rolling_checksum(checksum, &old_checksum, (char*)&rolling_buffer +1,
+	rolling_checksum(checksum, &old_checksum, rolling_buffer +1,
 			server->block_size);
 	return EXIT_SUCCESS;
 }

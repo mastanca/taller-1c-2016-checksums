@@ -89,12 +89,13 @@ int receive_existing_block(client_t* client){
 	fseek(client->old_file, client->block_size * existing_block_index,
 			SEEK_SET);
 
-	char old_bytes_buffer[client->block_size];
+	char* old_bytes_buffer = calloc(client->block_size, sizeof(char));
 	bool read_something = false;
 	read_from_file(client->old_file, old_bytes_buffer, client->block_size,
 		 &read_something);
-	fwrite(&old_bytes_buffer, sizeof(char), sizeof(old_bytes_buffer),
+	fwrite(&old_bytes_buffer, sizeof(char), strlen(old_bytes_buffer),
 	 client->new_file);
+	 free(old_bytes_buffer);
 	return EXIT_SUCCESS;
 }
 
@@ -117,7 +118,7 @@ int send_remote_filename(socket_t* skt, char* filename,
 int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 	bool read_something = false;
 	checksum_t checksum;
-	char buffer[block_size];
+	char* buffer = calloc(block_size, sizeof(char));
 	while(!feof(file)){
 		read_from_file(file, buffer, block_size, &read_something);
 		if (strcmp(buffer, "") != 0) {
@@ -126,11 +127,12 @@ int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 			set_checksum(&checksum, buffer, block_size);
 			int number_to_send = checksum.checksum;
 			socket_send(client->skt, (char*)&number_to_send, sizeof(number_to_send));
-			memset(buffer, 0, sizeof(buffer));
+			memset(buffer, 0, strlen(buffer));
 		}
 	}
 	int code = END_OF_LIST;
 	socket_send(client->skt, (char*)&code, sizeof(code));
+	free(buffer);
 	return EXIT_SUCCESS;
 }
 
