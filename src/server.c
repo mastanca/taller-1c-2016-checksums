@@ -147,7 +147,9 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server, 
 	char byte_to_window = block[0];
 	list_append(window_out_bytes, byte_to_window);
 	printf("Saved %c into windowed bytes\n", (char)byte_to_window);
-	fseek(server->remote_file, WINDOW_BYTE_DISPLACEMENT, SEEK_CUR);
+	// Move cursor block size bytes t the left and return 1
+	int index = WINDOW_BYTE_DISPLACEMENT * (server->block_size) + (-1 * WINDOW_BYTE_DISPLACEMENT);
+	fseek(server->remote_file, index, SEEK_CUR);
 	bool read_something = false;
 	read_from_file(server->remote_file, block, server->block_size, &read_something);
 	char rolling_buffer[server->block_size + 1];
