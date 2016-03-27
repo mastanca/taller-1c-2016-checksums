@@ -51,7 +51,6 @@ int receive_server_response(client_t* client){
 		socket_receive(client->skt, (char*)&server_code, sizeof(char));
 
 		if (server_code == NEW_BYTES_INDICATOR){
-
 			receive_new_bytes(client);
 		} else if (server_code == BLOCK_FOUND_INDICATOR){
 			receive_existing_block(client);
