@@ -77,7 +77,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 				list_init(&window_out_bytes);
 			}
 			send_found_block_number(skt, found_index);
-			read_from_file(server->remote_file, block, strlen(block),
+			read_from_file(server->remote_file, block, server->block_size,
 			 &read_something);
 			set_checksum(&checksum, block, strlen(block));
 		}
