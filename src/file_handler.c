@@ -11,7 +11,7 @@
  int read_from_file(FILE* file, char* buffer, size_t block_size,
     bool* read_something){
 	 *read_something = false;
-	char* tmp_buffer = calloc(block_size, sizeof(char));
+	char* tmp_buffer = calloc(block_size + 1, sizeof(char));
  	if (!feof(file)){
  		int read_bytes = fread(tmp_buffer, 1, block_size, file);
  		if (read_bytes != 0){

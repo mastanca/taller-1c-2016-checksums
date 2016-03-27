@@ -118,7 +118,7 @@ int send_remote_filename(socket_t* skt, char* filename,
 int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 	bool read_something = false;
 	checksum_t checksum;
-	char* buffer = calloc(block_size, sizeof(char));
+	char* buffer = calloc(block_size + 1, sizeof(char));
 	while(!feof(file)){
 		read_from_file(file, buffer, block_size, &read_something);
 		if (strcmp(buffer, "") != 0) {

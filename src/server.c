@@ -50,7 +50,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 	list_init(&window_out_bytes);
 
 	// Load new block from file
-	char* block = calloc(server->block_size, sizeof(char));
+	char* block = calloc(server->block_size + 1, sizeof(char));
 	read_from_file(server->remote_file, block, strlen(block), &read_something);
 
 	// Get checksum of the new block
@@ -145,19 +145,19 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
 	read_from_file(server->remote_file, block, server->block_size,
 		 &read_something);
 	char* rolling_buffer = calloc(server->block_size + 1, sizeof(char));
-	memset(rolling_buffer, 0, strlen(rolling_buffer));
 	rolling_buffer[0] = byte_to_window;
-	strncat(rolling_buffer, block, strlen(block));
+	memcpy(rolling_buffer + strlen(rolling_buffer), block, strlen(block));
 	checksum_t old_checksum;
 	old_checksum = *checksum;
 	rolling_checksum(checksum, &old_checksum, rolling_buffer +1,
 			server->block_size);
+	free(rolling_buffer);
 	return EXIT_SUCCESS;
 }
 
 int send_windowed_bytes(list_t* window_out_bytes, server_t* server,
 		socket_t* skt){
-	char* buffer_to_send = calloc(window_out_bytes->size, sizeof(char));
+	char* buffer_to_send = calloc(window_out_bytes->size + 1, sizeof(char));
 	for (int i = 0; i < window_out_bytes->size; ++i) {
 		char i_element = list_get(window_out_bytes, i);
 		strncat(buffer_to_send, &i_element, sizeof(char));
