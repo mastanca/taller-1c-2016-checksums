@@ -250,7 +250,7 @@ centering
 
 
 \begin_inset Graphics
-	filename /home/mastanca/Desktop/stdfigs.png
+	filename tp1_diagram.png
 	width 100text%
 	groupId common_image
 
@@ -298,56 +298,18 @@ En este trabajo se utilizaron conocimientos nuevos, aprendidos en las clases
  del trabajo practico, como lo es la sincronizacion de archivos.
 \end_layout
 
-\begin_layout Standard
-El trabajo practico sirvió para tomar conocimiento de los lineamientos que
- se van a seguir a la hora de la corrección de los trabajos prácticos durante
- la cursada de la materia.
-\end_layout
-
-\begin_layout Standard
-Además tomamos un primer contacto con el sistema de corrección automática,
- lo cual es importante para tener un mejor dominio del mismo en futuras
- entregas.
-\end_layout
-
-\begin_layout Standard
-El poder descargarse las pruebas que son ejecutadas por el sistema para
- poder correrlas en forma local es de gran ayuda para verificar que lo hecho
- en el trabajo practico este cumpliendo con las expectativas mínimas del
- sistema.
-\end_layout
-
 \begin_layout Subsection*
 \begin_inset Newpage pagebreak
 \end_inset
 
 
-\begin_inset Newline linebreak
-\end_inset
-
-Salida entrega final
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-placement h
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
 \begin_inset External
 	template PDFPages
-	filename ../taller-1c-2016-tp0/salidaEntregaTp0.pdf
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
+	filename 95188-ej1.1.2016-03-27-1658.pdf
+	extra LaTeX "pages=-"
 
 \end_inset
 

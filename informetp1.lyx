@@ -111,9 +111,9 @@ Objetivo
 \end_layout
 
 \begin_layout Standard
-El objetivo del trabajo practico fue utilizar los conociemientos obtenidos
+El objetivo del trabajo practico fue utilizar los conocimientos obtenidos
  en las clases de sockets y TDAs.
- Para ello se usaron las librerias de socket provistas por el entorno y
+ Para ello se usaron las librerías de socket provistas por el entorno y
  se desarrollaron un conjunto de TDAs que se explicaran en secciones posteriores.
 \end_layout
 
@@ -129,16 +129,16 @@ El entorno de trabajo elegido para la realización del trabajo practico fue
 \end_layout
 
 \begin_layout Section*
-Explicacion de enunciado
+Explicación de enunciado
 \end_layout
 
 \begin_layout Standard
-El trabajo consiste en realizar un sistema que haga una sincronizacion de
+El trabajo consiste en realizar un sistema que haga una sincronización de
  archivos entre un cliente y un servidor.
- El cliente tendra una copia local de un archivo y el servidor una nueva
- version del mismo.
+ El cliente tendrá una copia local de un archivo y el servidor una nueva
+ versión del mismo.
  El objetivo es que el cliente notifique al servidor el archivo que tiene
- a traves de checksums de bloques de bytes utilizando una variante del 
+ a través de checksums de bloques de bytes utilizando una variante del 
 \emph on
 Adler32.
  
@@ -147,8 +147,8 @@ Adler32.
 \begin_layout Standard
 El servidor recibe los checksums del cliente y compara contra los checksums
  de su archivo remoto.
- Para los que coincidan se le notifcara al cliente el bloque para el cual
- el checksum coincide, evitando asi reenviar todo el checksum y reutilizando
+ Para los que coincidan se le notificará al cliente el bloque para el cual
+ el checksum coincide, evitando así reenviar todo el checksum y reutilizando
  el archivo local del cliente.
  En caso de que haya un bloque nuevo se le enviara al cliente los nuevos
  bytes que debe agregar a su archivo.
@@ -161,7 +161,7 @@ Desarrollo
 \end_layout
 
 \begin_layout Standard
-A continuacion se detallara el algoritmo mas complejo del trabajo, el cual
+A continuación se detallara el algoritmo mas complejo del trabajo, el cual
  es como el servidor compara los checksums recibidos con los de su archivo
  remoto y notifica al cliente.
 \end_layout
@@ -179,10 +179,10 @@ Adler32.
  
 \emph default
 Seguido de esto comienza a iterar.
- En caso de que el checksum no este en la lista de checksums que recibio
+ En caso de que el checksum no este en la lista de checksums que recibió
  del cliente, desplaza la ventana de lectura del target en 1 byte y guarda
  el byte que quedo fuera de la ventana en un buffer.
- A continuacion calcula el 
+ A continuación calcula el 
 \emph on
 rolling checksum
 \begin_inset Foot
@@ -199,19 +199,19 @@ Se calcula el rolling checksum ya que es mas eficiente que volver a calcular
 
 
 \emph default
- del nuevo bloque y reinicia la iteracion.
+ del nuevo bloque y reinicia la iteración.
 \end_layout
 
 \begin_layout Standard
 En el caso en que el checksum este en la lista de checksums que el cliente
- le envio, entonces se fija si tiene bytes que hayan sido desplazados de
+ le envió, entonces se fija si tiene bytes que hayan sido desplazados de
  la ventana y guardados en el buffer.
- Si hay entonces le envia esos bytes al cliente.
- Si no hay bytes desplazados entonces envia al cliente el numero de bloque
+ Si hay entonces le envía esos bytes al cliente.
+ Si no hay bytes desplazados entonces envía al cliente el numero de bloque
  que este tiene en su archivo local para el cual el checksum del archivo
  target coincide.
  Para terminar mueve la ventana de lectura en un bloque, le calcula su checksum
- y reinicia la iteracion.
+ y reinicia la iteración.
 \begin_inset Newline newline
 \end_inset
 
@@ -219,7 +219,7 @@ En el caso en que el checksum este en la lista de checksums que el cliente
 \end_layout
 
 \begin_layout Standard
-Se inlcuye un diagrama de estados 
+Se incluye un diagrama de estados 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "fig:Diagrama-de-estados"
@@ -250,7 +250,7 @@ centering
 
 
 \begin_inset Graphics
-	filename /home/mastanca/Desktop/stdfigs.png
+	filename tp1_diagram.png
 	width 100text%
 	groupId common_image
 
@@ -291,11 +291,11 @@ Conclusión
 \begin_layout Standard
 En este trabajo se utilizaron conocimientos nuevos, aprendidos en las clases
  de la materia, sobre sockets y se reutilizaron algunos como los de TDAs
- que habiamos incorporado de materias anteriores.
+ que habíamos incorporado de materias anteriores.
  Si bien al principio el problema de los sockets puede ser un poco complejo,
- una correcta utilizacion de TDAs y por ende un correcto encapsulamiento
+ una correcta utilización de TDAs y por ende un correcto encapsulamiento
  permite que nos podamos enfocar de lleno en lo mas importante del enunciado
- del trabajo practico, como lo es la sincronizacion de archivos.
+ del trabajo practico, como lo es la sincronización de archivos.
 \end_layout
 
 \begin_layout Subsection*
