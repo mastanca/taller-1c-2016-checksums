@@ -21,10 +21,10 @@ int server_execution(int argc, char* argv[]){
 	list_init(&server.checksum_list);
 
 	socket_init(server.skt, NULL, port);
-	// Avoid time wait
-	int option = 1;
-	setsockopt(server.skt->fd,SOL_SOCKET,(SO_REUSEPORT | SO_REUSEADDR),
-			(char*)&option,sizeof(option));
+	// // Avoid time wait
+	// int option = 1;
+	// setsockopt(server.skt->fd,SOL_SOCKET,(SO_REUSEPORT | SO_REUSEADDR),
+	// 		(char*)&option,sizeof(option));
 
 	socket_bind(server.skt);
 
