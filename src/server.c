@@ -16,8 +16,6 @@ int server_execution(int argc, char* argv[]){
 	server_t server;
 	server.skt = &acep;
 
-	list_t list;
-	server.checksum_list= list;
 	list_init(&server.checksum_list);
 
 	socket_init(server.skt, NULL, port);
