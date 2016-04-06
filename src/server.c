@@ -7,6 +7,22 @@
 
 #include "server.h"
 
+// Receives the name of the target file, returns 0 on success
+static int receive_remote_filename(socket_t* skt, server_t* server);
+// Receives a list of checksums, returns 0 on success
+static int receive_checksum_list(socket_t* skt, server_t* server);
+// Initiates the comparison of checksums from received and target file
+static int start_comparison_sequence(server_t* server, socket_t* skt);
+// Windows the not found byte and computes the rolling checksum
+static int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
+		checksum_t* checksum);
+// Sends the bytes that where windowed to client
+static int send_windowed_bytes(list_t* window_out_bytes, socket_t* client_skt);
+// Sends the found block number to client
+static int send_found_block_number(socket_t* client_skt, unsigned int index);
+// Sends EOF code to client
+static int send_eof(socket_t* client_skt);
+
 int server_execution(int argc, char* argv[]){
 	if (argc != 3){
 		return 1;
@@ -38,7 +54,7 @@ int server_execution(int argc, char* argv[]){
 
 	receive_remote_filename(&client_skt, &server);
 
-	receive_checksum_list(&client_skt, server.block_size, &server);
+	receive_checksum_list(&client_skt, &server);
 
 	start_comparison_sequence(&server, &client_skt);
 
@@ -71,7 +87,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 		int found_index = 0;
 		bool found = false;
 		while(i < server->checksum_list.size && !found){
-			int i_element = list_get(&server->checksum_list, i);
+			unsigned int i_element = list_get(&server->checksum_list, i);
 			if(checksum.checksum == i_element){
 				found = true;
 				found_index = i;
@@ -82,7 +98,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 			checksum_not_found(block, &window_out_bytes, server, &checksum);
 		}else{
 			if (window_out_bytes.size > 0){
-				send_windowed_bytes(&window_out_bytes, server, skt);
+				send_windowed_bytes(&window_out_bytes, skt);
 			}
 			send_found_block_number(skt, found_index);
 			read_from_file(server->remote_file, block, strlen(block),
@@ -93,11 +109,11 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 	// If there are remaining windowed bytes send them
 	if (window_out_bytes.size > 0 || ((strlen(block) > 0) &&
 	 (read_something == true))){
-		for (int i = 0; i < strlen(block); ++i) {
+		for (unsigned int i = 0; i < strlen(block); ++i) {
 			char remaining_char = block[i];
 			list_append(&window_out_bytes, remaining_char);
 		}
-		send_windowed_bytes(&window_out_bytes, server, skt);
+		send_windowed_bytes(&window_out_bytes, skt);
 	}
 	free(block);
 	list_free(&window_out_bytes);
@@ -128,8 +144,7 @@ int receive_remote_filename(socket_t* skt, server_t* server){
 	return EXIT_SUCCESS;
 }
 
-int receive_checksum_list(socket_t* skt, unsigned int block_size,
-		server_t* server){
+int receive_checksum_list(socket_t* skt, server_t* server){
 	char code = '\0';
 	int checksum = 0;
 	while (code != END_OF_LIST){
@@ -168,8 +183,7 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
 	return EXIT_SUCCESS;
 }
 
-int send_windowed_bytes(list_t* window_out_bytes, server_t* server,
-		socket_t* skt){
+int send_windowed_bytes(list_t* window_out_bytes, socket_t* skt){
 	char* buffer_to_send = calloc(window_out_bytes->size + 1, sizeof(char));
 	for (int i = 0; i < window_out_bytes->size; ++i) {
 		char i_element = list_get(window_out_bytes, i);

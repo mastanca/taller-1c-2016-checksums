@@ -22,7 +22,7 @@ typedef struct client{
 	unsigned int block_size;
 }client_t;
 
-int client_execution(int argc, char* argv[]);
+int client_execution(char* argv[]);
 int send_remote_filename(socket_t* skt, char* filename,
 		unsigned int block_size);
 int send_file_chunks(client_t* client, FILE* file, unsigned int block_size);

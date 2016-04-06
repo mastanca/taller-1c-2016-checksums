@@ -36,9 +36,6 @@ int socket_connect(socket_t* skt);
 int socket_receive(socket_t* skt, char* buffer, int size);
 int socket_send(socket_t* skt, char* buffer, int size);
 
-int handle_error(char* function_name);
-
-
 
 
 #endif /* SRC_LIB_SOCKET_H_ */

@@ -8,7 +8,7 @@
 
 #include "client.h"
 
-int client_execution(int argc, char* argv[]){
+int client_execution(char* argv[]){
 	client_t client;
 	char* hostname = argv[2];
 	char* port = argv[3];

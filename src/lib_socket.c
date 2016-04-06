@@ -34,7 +34,6 @@ int socket_init(socket_t* skt, char* hostname, char* port){
 	skt->fd = socket(skt->result->ai_family, skt->result->ai_socktype,
 			skt->result->ai_protocol);
 	if (skt->fd == -1){
-		handle_error("init");
 		return 1;
 	}
 	return EXIT_SUCCESS;
@@ -42,11 +41,9 @@ int socket_init(socket_t* skt, char* hostname, char* port){
 
 int socket_destroy(socket_t* skt){
 	if (shutdown(skt->fd, SHUT_RDWR) == -1){
-		handle_error("destroy (shutdown)");
 		return 1;
 	}
 	if (close(skt->fd) == -1){
-		handle_error("destroy (close)");
 		return 1;
 	}
 	return EXIT_SUCCESS;
@@ -54,7 +51,6 @@ int socket_destroy(socket_t* skt){
 
 int socket_bind(socket_t* skt){
 	if (bind(skt->fd, skt->result->ai_addr, skt->result->ai_addrlen) == -1){
-		handle_error("bind");
 		close(skt->fd);
 		freeaddrinfo(skt->result);
 		return 1;
@@ -65,7 +61,6 @@ int socket_bind(socket_t* skt){
 
 int socket_listen(socket_t* skt, int max_clients) {
 	if (listen(skt->fd, max_clients) == -1){
-		handle_error("listen");
 		return 1;
 	}
 	return EXIT_SUCCESS;
@@ -74,7 +69,6 @@ int socket_listen(socket_t* skt, int max_clients) {
 int socket_accept(socket_t* skt, socket_t* client_skt) {
 	client_skt->fd = accept(skt->fd, NULL, NULL);
 	if (client_skt->fd == -1){
-		handle_error("accept");
 		return 1;
 	}
 	return EXIT_SUCCESS;
@@ -88,7 +82,6 @@ int socket_connect(socket_t* skt) {
 			ptr = ptr->ai_next) {
 		s = connect(skt->fd, ptr->ai_addr, ptr->ai_addrlen);
 		if (s == -1){
-			handle_error("connect");
 			close(skt->fd);
 			skt->fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 		}
@@ -154,12 +147,6 @@ int socket_send(socket_t* skt, char* buffer, int size) {
 		return -EXIT_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
-}
-
-int handle_error(char* function_name){
-//	fprintf(stderr, "Error on %s: ", function_name);
-//	fprintf(stderr, "%s\n", strerror(errno));
 	return EXIT_SUCCESS;
 }
 
