@@ -25,48 +25,50 @@ static int send_found_block_number(socket_t* client_skt, unsigned int index);
 // Sends EOF code to client
 static int send_eof(socket_t* client_skt);
 
-int server_execution(int argc, char* argv[]){
-	if (argc != 3){
-		return 1;
+int server_init(server_t* server, int arguments_count, char* arguments[]){
+	if (arguments_count != 3){
+		return EXIT_FAILURE;
 	}
-	char* port = argv[2];
 	socket_t acep;
-	server_t server;
-	server.skt = &acep;
+	server->skt = &acep;
+	server->port = arguments[2];
 
 	list_t list;
 	// Compiler warning if this values are not zero before list init
 	list.capacity = 0;
 	list.size = 0;
 	list.data = NULL;
-	server.checksum_list = list;
-	list_init(&server.checksum_list);
+	server->checksum_list = list;
+	list_init(&(server->checksum_list));
+	// Initiate server sockets
+	socket_init(server->skt, NULL, server->port);
 
-	socket_init(server.skt, NULL, port);
-	// // Avoid time wait
-	// int option = 1;
-	// setsockopt(server.skt->fd,SOL_SOCKET,(SO_REUSEPORT | SO_REUSEADDR),
-	// 		(char*)&option,sizeof(option));
+	socket_bind(server->skt);
 
-	socket_bind(server.skt);
-
-	socket_listen(server.skt, MAX_NUMBER_OF_CLIENTS);
+	socket_listen(server->skt, MAX_NUMBER_OF_CLIENTS);
 	socket_t client_skt;
-	socket_accept(server.skt, &client_skt);
+	server->client_skt = &client_skt;
 
-	receive_remote_filename(&client_skt, &server);
+	socket_accept(server->skt, server->client_skt);
+	return EXIT_SUCCESS;
+}
 
-	receive_checksum_list(&client_skt, &server);
-
-	start_comparison_sequence(&server, &client_skt);
-
-	socket_destroy(&client_skt);
-
-	socket_destroy(server.skt);
-
-	fclose(server.remote_file);
+int server_destroy(server_t* server){
+	socket_destroy(server->client_skt);
+	socket_destroy(server->skt);
+	fclose(server->remote_file);
 	// Free checksum list
-	list_free(&server.checksum_list);
+	list_free(&(server->checksum_list));
+	return EXIT_SUCCESS;
+}
+
+int server_run(server_t* server){
+	receive_remote_filename(server->client_skt, server);
+
+	receive_checksum_list(server->client_skt, server);
+
+	start_comparison_sequence(server, server->client_skt);
+
 	return EXIT_SUCCESS;
 }
 
@@ -83,6 +85,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 	// Get checksum of the new block
 	checksum_t checksum;
 	set_checksum(&checksum, block, strlen(block));
+
 
 	while(!feof(server->remote_file)){
 		int i = 0;
@@ -130,8 +133,10 @@ int receive_remote_filename(socket_t* skt, server_t* server){
 
 	socket_receive(skt, (char*)&filename_length, sizeof(int));
 
+
 	char *name = malloc(filename_length + 1);
 	socket_receive(skt, name, filename_length);
+
 	name[filename_length] = 0;
 
 	socket_receive(skt, (char*)&block_size, sizeof(int));

@@ -19,11 +19,18 @@
 // Define server ADT
 typedef struct server{
 	socket_t* skt;
+	socket_t* client_skt;
 	unsigned int block_size;
 	FILE* remote_file;
 	list_t checksum_list;
+	char* port;
 }server_t;
 
-int server_execution(int argc, char* argv[]);
+// Initiates server, returns 0 on success
+int server_init(server_t* server, int arguments_count, char* arguments[]);
+// Starts the server algorithm
+int server_run(server_t* server);
+// Closes and frees server resources
+int server_destroy(server_t* server);
 
 #endif /* SRC_SERVER_H_ */
