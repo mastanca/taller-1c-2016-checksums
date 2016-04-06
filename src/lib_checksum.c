@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int checksum_init(checksum_t* checksum){
+int checksum_init(checksum_t* checksum){
 	checksum->lower = 0;
 	checksum->higher = 0;
 	checksum->checksum = 0;
@@ -24,8 +24,7 @@ static int set_checksum_result(checksum_t* checksum){
 }
 
 // Stores the resulting checksum in checksum arg
-int set_checksum(checksum_t* checksum, char* input, size_t size){
-	checksum_init(checksum);
+int checksum_set(checksum_t* checksum, char* input, size_t size){
 
 	for (unsigned int i = 0; i < size; ++i) {
 		checksum->lower += input[i];
@@ -38,7 +37,7 @@ int set_checksum(checksum_t* checksum, char* input, size_t size){
 }
 
 // Rolling checksum assumes buffer is contiguous in memory
-int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum,
+int checksum_rolling(checksum_t* new_checksum, checksum_t* old_checksum,
 		char* buffer, size_t size){
 	checksum_init(new_checksum);
 

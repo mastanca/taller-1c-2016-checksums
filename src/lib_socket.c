@@ -16,7 +16,7 @@ int socket_init(socket_t* skt, char* hostname, char* port){
 		hostname = NULL;
 		flag = AI_PASSIVE;
 	}
-
+	// Port is received as a parameter from user, no need to convert to net
 	const char *serviceName = port;
 
 	memset(&hints, 0, sizeof(struct addrinfo));
@@ -27,7 +27,6 @@ int socket_init(socket_t* skt, char* hostname, char* port){
 	s = getaddrinfo(hostname, serviceName, &hints, &skt->result);
 
 	if (s != 0) {
-		fprintf(stderr, "Error in getaddrinfo: %s\n", gai_strerror(s));
 		return 1;
 	}
 
@@ -76,17 +75,11 @@ int socket_accept(socket_t* skt, socket_t* client_skt) {
 
 int socket_connect(socket_t* skt) {
 	int s = 0;
-	struct addrinfo *ptr;
 	bool are_we_connected = false;
-	for (ptr = skt->result; ptr != NULL && are_we_connected == false;
-			ptr = ptr->ai_next) {
+	struct addrinfo *ptr = skt->result;
 		s = connect(skt->fd, ptr->ai_addr, ptr->ai_addrlen);
-		if (s == -1){
-			close(skt->fd);
-			skt->fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
-		}
 		are_we_connected = (s != -1);
-	}
+
 	freeaddrinfo(skt->result);
 	if (are_we_connected == false){
 		return EXIT_FAILURE;
@@ -118,8 +111,6 @@ int socket_receive(socket_t* skt, char* buffer, int size) {
 	} else {
 		return -EXIT_FAILURE;
 	}
-
-	return EXIT_SUCCESS;
 }
 
 int socket_send(socket_t* skt, char* buffer, int size) {
@@ -146,7 +137,5 @@ int socket_send(socket_t* skt, char* buffer, int size) {
 	} else {
 		return -EXIT_FAILURE;
 	}
-
-	return EXIT_SUCCESS;
 }
 

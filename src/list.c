@@ -24,9 +24,7 @@ void list_append(list_t *list, int value) {
 // Return the block at the given index
 int list_get(list_t *list, int index) {
 	if (index >= list->size || index < 0) {
-		printf("Index %d out of bounds for list of size %d\n", index,
-				list->size);
-		return -1;
+		return EXIT_FAILURE;
 	}
 	return list->data[index];
 }

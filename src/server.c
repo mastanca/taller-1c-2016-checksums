@@ -86,7 +86,8 @@ static int start_comparison_sequence(server_t* server, socket_t* skt){
 
 	// Get checksum of the new block
 	checksum_t checksum;
-	set_checksum(&checksum, block, strlen(block));
+	checksum_init(&checksum);
+	checksum_set(&checksum, block, strlen(block));
 
 
 	while(!feof(server->remote_file)){
@@ -108,7 +109,8 @@ static int start_comparison_sequence(server_t* server, socket_t* skt){
 			send_found_block_number(skt, found_index);
 			read_from_file(server->remote_file, block, strlen(block),
 			 &read_something);
-			set_checksum(&checksum, block, strlen(block));
+			checksum_init(&checksum);
+			checksum_set(&checksum, block, strlen(block));
 		}
 	}
 	// If there are remaining windowed bytes send them
@@ -128,11 +130,12 @@ static int start_comparison_sequence(server_t* server, socket_t* skt){
 }
 
 static int receive_remote_filename(socket_t* skt, server_t* server){
-	int filename_length;
-	int block_size;
+	uint32_t filename_length;
+	uint32_t block_size;
 
 	socket_receive(skt, (char*)&filename_length, sizeof(int));
-
+	// Care about endiannes
+	filename_length = ntohl(filename_length);
 
 	char *name = malloc(filename_length + 1);
 	socket_receive(skt, name, filename_length);
@@ -141,7 +144,8 @@ static int receive_remote_filename(socket_t* skt, server_t* server){
 
 	socket_receive(skt, (char*)&block_size, sizeof(int));
 
-	server->block_size = block_size;
+	// Care about endiannes
+	server->block_size = ntohl(block_size);
 
 	// Open remote file here and assign to server_t
 	server->remote_file = fopen(name, "r");
@@ -183,7 +187,7 @@ static int checksum_not_found(server_t* server, char* block, list_t* window_out_
 	checksum_t old_checksum;
 	old_checksum = *checksum;
 
-	rolling_checksum(checksum, &old_checksum, rolling_buffer +1,
+	checksum_rolling(checksum, &old_checksum, rolling_buffer +1,
 			server->block_size);
 
 	free(rolling_buffer);
@@ -201,7 +205,7 @@ static int send_windowed_bytes(list_t* window_out_bytes, socket_t* skt){
 	socket_send(skt, (char*)&new_bytes_indicator, sizeof(new_bytes_indicator));
 
 	// Send 4 bytes with the length of the new bytes
-	int new_bytes_size = strlen(buffer_to_send);
+	int new_bytes_size = htonl(strlen(buffer_to_send));
 
 	socket_send(skt, (char*)&new_bytes_size, sizeof(new_bytes_size));
 

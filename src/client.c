@@ -25,13 +25,13 @@ int client_execution(char* argv[]){
 	if (socket_connect(client.skt) == 0){
 		// Open new file
 		client.new_file = NULL;
-		client.new_file = fopen(new_file_name, "w");
+		client.new_file = fopen(new_file_name, "wb");
 
 		send_remote_filename(client.skt, remote_file_name, client.block_size);
 
 		// Open old file
 		client.old_file = NULL;
-		client.old_file = fopen(old_file_name, "r");
+		client.old_file = fopen(old_file_name, "rb");
 		if (client.old_file != NULL){
 			send_file_chunks(&client, client.old_file, client.block_size);
 		}
@@ -63,10 +63,11 @@ int receive_server_response(client_t* client){
 }
 
 int receive_new_bytes(client_t* client){
-	int new_bytes_longitude = 0;
+	uint32_t new_bytes_longitude = 0;
 	socket_receive(client->skt, (char*)&new_bytes_longitude,
 			sizeof(new_bytes_longitude));
 	// Weird bug when using stack, so malloc!
+	new_bytes_longitude = ntohl(new_bytes_longitude);
 	char* new_bytes_buffer = malloc(new_bytes_longitude);
 	memset(new_bytes_buffer, 0, new_bytes_longitude);
 	socket_receive(client->skt, new_bytes_buffer, new_bytes_longitude);
@@ -78,7 +79,7 @@ int receive_new_bytes(client_t* client){
 }
 
 int receive_existing_block(client_t* client){
-	int existing_block_index = -1;
+	uint32_t existing_block_index = -1;
 	socket_receive(client->skt, (char*)&existing_block_index,
 			sizeof(existing_block_index));
 
@@ -98,10 +99,14 @@ int receive_existing_block(client_t* client){
 
 int send_remote_filename(socket_t* skt, char* filename,
 		unsigned int block_size){
-	int filename_length = strlen(filename);
+	uint32_t filename_length = strlen(filename);
 	char *buffer = malloc(filename_length + 2 * sizeof(int));
 
-	memcpy(buffer, &filename_length, sizeof(int));
+	// Care about endiannes
+	uint32_t net_filename_length = htonl(filename_length);
+	block_size = htonl(block_size);
+
+	memcpy(buffer, &net_filename_length, sizeof(int));
 	memcpy(buffer + sizeof(int), filename, filename_length);
 	memcpy(buffer + sizeof(int) + filename_length, &block_size, sizeof(int));
 
@@ -122,8 +127,9 @@ int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 			char code = CHECKSUM_INDICATOR;
 
 			socket_send(client->skt, (char*)&code, sizeof(code));
-			set_checksum(&checksum, buffer, block_size);
-			int number_to_send = checksum.checksum;
+			checksum_init(&checksum);
+			checksum_set(&checksum, buffer, block_size);
+			int number_to_send = get_checksum(&checksum);
 
 			socket_send(client->skt, (char*)&number_to_send, sizeof(number_to_send));
 			memset(buffer, 0, strlen(buffer));
