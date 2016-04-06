@@ -106,7 +106,10 @@ static int receive_existing_block(client_t* client){
 			SEEK_SET);
 
 	char* old_bytes_buffer = calloc(client->block_size + 1, sizeof(char));
-	fread(old_bytes_buffer, sizeof(char), client->block_size, client->old_file);
+	if (fread(old_bytes_buffer, sizeof(char), client->block_size, client->old_file) != 0){
+		 free(old_bytes_buffer);
+		 return EXIT_FAILURE;
+	}
 	fwrite(old_bytes_buffer, sizeof(char), strlen(old_bytes_buffer),
 	 client->new_file);
 	 free(old_bytes_buffer);
@@ -137,8 +140,7 @@ static int send_file_chunks(client_t* client, FILE* file, unsigned int block_siz
 	checksum_t checksum;
 	char* buffer = calloc(block_size + 1, sizeof(char));
 	while(!feof(file)){
-		fread(buffer, sizeof(char), block_size, file);
-		if (strcmp(buffer, "") != 0) {
+		if (fread(buffer, sizeof(char), block_size, file) != 0) {
 			char code = CHECKSUM_INDICATOR;
 
 			socket_send(client->skt, (char*)&code, sizeof(code));

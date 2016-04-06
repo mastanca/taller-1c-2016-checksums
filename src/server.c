@@ -81,7 +81,11 @@ static int start_comparison_sequence(server_t* server, socket_t* skt){
 
 	// Load new block from file
 	char* block = calloc(server->block_size + 1, sizeof(char));
-	fread(block, sizeof(char), server->block_size, server->remote_file);
+	if (fread(block, sizeof(char), server->block_size, server->remote_file) == 0){
+		free(block);
+		list_free(&window_out_bytes);
+		return EXIT_FAILURE;
+	}
 
 	// Get checksum of the new block
 	checksum_t checksum;
@@ -106,9 +110,10 @@ static int start_comparison_sequence(server_t* server, socket_t* skt){
 				send_windowed_bytes(&window_out_bytes, skt);
 			}
 			send_found_block_number(skt, found_index);
-			fread(block, sizeof(char), strlen(block), server->remote_file);
-			checksum_init(&checksum);
-			checksum_set(&checksum, block, strlen(block));
+			if (fread(block, sizeof(char), strlen(block), server->remote_file) != 0){
+				checksum_init(&checksum);
+				checksum_set(&checksum, block, strlen(block));
+			}
 		}
 	}
 	// If there are remaining windowed bytes send them
@@ -178,19 +183,20 @@ static int checksum_not_found(server_t* server, char* block, list_t* window_out_
 	fseek(server->remote_file, index, SEEK_CUR);
 	// Clean old bytes and read to block
 	memset(block, 0, strlen(block));
-	fread(block, sizeof(char), server->block_size, server->remote_file);
+	if (fread(block, sizeof(char), server->block_size, server->remote_file) != 0){
+	//	char* rolling_buffer = calloc(server->block_size + 1, sizeof(char));
+	//	rolling_buffer[0] = byte_to_window;
+	//	memcpy(rolling_buffer + strlen(rolling_buffer), block, strlen(block));
+		checksum_t old_checksum;
+		checksum_init(&old_checksum);
+		old_checksum = *checksum;
 
-	char* rolling_buffer = calloc(server->block_size + 1, sizeof(char));
-	rolling_buffer[0] = byte_to_window;
-	memcpy(rolling_buffer + strlen(rolling_buffer), block, strlen(block));
-	checksum_t old_checksum;
-	old_checksum = *checksum;
+		checksum_rolling(checksum, &old_checksum, block, server->block_size);
 
-	checksum_rolling(checksum, &old_checksum, rolling_buffer +1,
-			server->block_size);
-
-	free(rolling_buffer);
-	return EXIT_SUCCESS;
+	//	free(rolling_buffer);
+		return EXIT_SUCCESS;
+	}
+	return EXIT_FAILURE;
 }
 
 static int send_windowed_bytes(list_t* window_out_bytes, socket_t* skt){
