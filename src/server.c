@@ -7,6 +7,8 @@
 
 #include "server.h"
 
+#define MAX_NUMBER_OF_CLIENTS 1
+
 // Receives the name of the target file, returns 0 on success
 static int receive_remote_filename(socket_t* skt, server_t* server);
 // Receives a list of checksums, returns 0 on success
@@ -48,7 +50,7 @@ int server_execution(int argc, char* argv[]){
 
 	socket_bind(server.skt);
 
-	socket_listen(server.skt, 5);
+	socket_listen(server.skt, MAX_NUMBER_OF_CLIENTS);
 	socket_t client_skt;
 	socket_accept(server.skt, &client_skt);
 
