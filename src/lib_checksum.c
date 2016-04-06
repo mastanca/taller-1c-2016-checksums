@@ -52,3 +52,7 @@ int rolling_checksum(checksum_t* new_checksum, checksum_t* old_checksum,
 	return EXIT_SUCCESS;
 }
 
+ulong get_checksum(checksum_t* checksum){
+	return checksum->checksum;
+}
+

@@ -49,3 +49,8 @@ void list_double_capacity_if_full(list_t *list) {
 void list_free(list_t *list) {
 	free(list->data);
 }
+
+int list_get_size(list_t* list){
+	return list->size;
+}
+

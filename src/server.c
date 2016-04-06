@@ -16,7 +16,7 @@ static int receive_checksum_list(socket_t* skt, server_t* server);
 // Initiates the comparison of checksums from received and target file
 static int start_comparison_sequence(server_t* server, socket_t* skt);
 // Windows the not found byte and computes the rolling checksum
-static int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
+static int checksum_not_found(server_t* server, char* block, list_t* window_out_bytes,
 		checksum_t* checksum);
 // Sends the bytes that where windowed to client
 static int send_windowed_bytes(list_t* window_out_bytes, socket_t* client_skt);
@@ -24,6 +24,8 @@ static int send_windowed_bytes(list_t* window_out_bytes, socket_t* client_skt);
 static int send_found_block_number(socket_t* client_skt, unsigned int index);
 // Sends EOF code to client
 static int send_eof(socket_t* client_skt);
+// Returns the size of the checksums list
+static int get_size_of_checksum_list();
 
 int server_init(server_t* server, int arguments_count, char* arguments[]){
 	if (arguments_count != 3){
@@ -72,7 +74,7 @@ int server_run(server_t* server){
 	return EXIT_SUCCESS;
 }
 
-int start_comparison_sequence(server_t* server, socket_t* skt){
+static int start_comparison_sequence(server_t* server, socket_t* skt){
 	bool read_something = false;
 	list_t window_out_bytes;
 	list_init(&window_out_bytes);
@@ -89,20 +91,18 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 
 	while(!feof(server->remote_file)){
 		int i = 0;
-		int found_index = 0;
-		bool found = false;
-		while(i < server->checksum_list.size && !found){
+		int found_index = -1;
+		while(i < get_size_of_checksum_list(server) && found_index < 0){
 			unsigned int i_element = list_get(&server->checksum_list, i);
-			if(checksum.checksum == i_element){
-				found = true;
+			if(get_checksum(&checksum) == i_element){
 				found_index = i;
 			}
 			i++;
 		}
-		if (!found){
-			checksum_not_found(block, &window_out_bytes, server, &checksum);
+		if (found_index < 0){
+			checksum_not_found(server, block, &window_out_bytes, &checksum);
 		}else{
-			if (window_out_bytes.size > 0){
+			if (list_get_size(&window_out_bytes) > 0){
 				send_windowed_bytes(&window_out_bytes, skt);
 			}
 			send_found_block_number(skt, found_index);
@@ -112,7 +112,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 		}
 	}
 	// If there are remaining windowed bytes send them
-	if (window_out_bytes.size > 0 || ((strlen(block) > 0) &&
+	if (list_get_size(&window_out_bytes) > 0 || ((strlen(block) > 0) &&
 	 (read_something == true))){
 		for (unsigned int i = 0; i < strlen(block); ++i) {
 			char remaining_char = block[i];
@@ -127,7 +127,7 @@ int start_comparison_sequence(server_t* server, socket_t* skt){
 	return EXIT_SUCCESS;
 }
 
-int receive_remote_filename(socket_t* skt, server_t* server){
+static int receive_remote_filename(socket_t* skt, server_t* server){
 	int filename_length;
 	int block_size;
 
@@ -151,7 +151,7 @@ int receive_remote_filename(socket_t* skt, server_t* server){
 	return EXIT_SUCCESS;
 }
 
-int receive_checksum_list(socket_t* skt, server_t* server){
+static int receive_checksum_list(socket_t* skt, server_t* server){
 	char code = '\0';
 	int checksum = 0;
 	while (code != END_OF_LIST){
@@ -165,7 +165,7 @@ int receive_checksum_list(socket_t* skt, server_t* server){
 	return EXIT_SUCCESS;
 }
 
-int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
+static int checksum_not_found(server_t* server, char* block, list_t* window_out_bytes,
 		checksum_t* checksum){
 	char byte_to_window = block[0];
 	list_append(window_out_bytes, byte_to_window);
@@ -190,7 +190,7 @@ int checksum_not_found(char* block, list_t* window_out_bytes, server_t* server,
 	return EXIT_SUCCESS;
 }
 
-int send_windowed_bytes(list_t* window_out_bytes, socket_t* skt){
+static int send_windowed_bytes(list_t* window_out_bytes, socket_t* skt){
 	char* buffer_to_send = calloc(window_out_bytes->size + 1, sizeof(char));
 	for (int i = 0; i < window_out_bytes->size; ++i) {
 		char i_element = list_get(window_out_bytes, i);
@@ -213,7 +213,7 @@ int send_windowed_bytes(list_t* window_out_bytes, socket_t* skt){
 	return EXIT_SUCCESS;
 }
 
-int send_found_block_number(socket_t* skt, unsigned int index){
+static int send_found_block_number(socket_t* skt, unsigned int index){
 	char block_found_indicator = BLOCK_FOUND_INDICATOR;
 
 	socket_send(skt, (char*)&block_found_indicator,
@@ -224,9 +224,13 @@ int send_found_block_number(socket_t* skt, unsigned int index){
 	return EXIT_SUCCESS;
 }
 
-int send_eof(socket_t* skt){
+static int send_eof(socket_t* skt){
 	char eof_indicator = EOF_INDICATOR;
 
 	socket_send(skt, (char*)&eof_indicator, sizeof(eof_indicator));
 	return EXIT_SUCCESS;
+}
+
+static int get_size_of_checksum_list(server_t* server){
+	return list_get_size(&(server->checksum_list));
 }
