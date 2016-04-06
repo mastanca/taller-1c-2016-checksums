@@ -88,9 +88,7 @@ int receive_existing_block(client_t* client){
 			SEEK_SET);
 
 	char* old_bytes_buffer = calloc(client->block_size + 1, sizeof(char));
-	bool read_something = false;
-	read_from_file(client->old_file, old_bytes_buffer, client->block_size,
-		 &read_something);
+	fread(old_bytes_buffer, sizeof(char), client->block_size, client->old_file);
 	fwrite(old_bytes_buffer, sizeof(char), strlen(old_bytes_buffer),
 	 client->new_file);
 	 free(old_bytes_buffer);
@@ -118,11 +116,10 @@ int send_remote_filename(socket_t* skt, char* filename,
 }
 
 int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
-	bool read_something = false;
 	checksum_t checksum;
 	char* buffer = calloc(block_size + 1, sizeof(char));
 	while(!feof(file)){
-		read_from_file(file, buffer, block_size, &read_something);
+		fread(buffer, sizeof(char), block_size, file);
 		if (strcmp(buffer, "") != 0) {
 			char code = CHECKSUM_INDICATOR;
 

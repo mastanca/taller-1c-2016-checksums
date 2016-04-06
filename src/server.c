@@ -81,8 +81,7 @@ static int start_comparison_sequence(server_t* server, socket_t* skt){
 
 	// Load new block from file
 	char* block = calloc(server->block_size + 1, sizeof(char));
-	read_from_file(server->remote_file, block, server->block_size,
-			&read_something);
+	fread(block, sizeof(char), server->block_size, server->remote_file);
 
 	// Get checksum of the new block
 	checksum_t checksum;
@@ -107,8 +106,7 @@ static int start_comparison_sequence(server_t* server, socket_t* skt){
 				send_windowed_bytes(&window_out_bytes, skt);
 			}
 			send_found_block_number(skt, found_index);
-			read_from_file(server->remote_file, block, strlen(block),
-			 &read_something);
+			fread(block, sizeof(char), strlen(block), server->remote_file);
 			checksum_init(&checksum);
 			checksum_set(&checksum, block, strlen(block));
 		}
@@ -178,9 +176,9 @@ static int checksum_not_found(server_t* server, char* block, list_t* window_out_
 	int index = WINDOW_BYTE_DISPLACEMENT * (server->block_size) +
 	 (-1 * WINDOW_BYTE_DISPLACEMENT);
 	fseek(server->remote_file, index, SEEK_CUR);
-	bool read_something = false;
-	read_from_file(server->remote_file, block, server->block_size,
-		 &read_something);
+	// Clean old bytes and read to block
+	memset(block, 0, strlen(block));
+	fread(block, sizeof(char), server->block_size, server->remote_file);
 	char* rolling_buffer = calloc(server->block_size + 1, sizeof(char));
 	rolling_buffer[0] = byte_to_window;
 	memcpy(rolling_buffer + strlen(rolling_buffer), block, strlen(block));
