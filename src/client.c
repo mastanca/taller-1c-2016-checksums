@@ -8,43 +8,61 @@
 
 #include "client.h"
 
-int client_execution(char* argv[]){
-	client_t client;
-	char* hostname = argv[2];
-	char* port = argv[3];
+// Client tells server which file is going to target and the block size
+// to use
+static int client_point_target_file(socket_t* skt, char* filename,
+		unsigned int block_size);
+// Send file checksums of block size to server
+static int send_file_chunks(client_t* client, FILE* file, unsigned int block_size);
+// Receive bytes not available in local file
+static int receive_new_bytes(client_t* client);
+// Receive existing local block number
+static int receive_existing_block(client_t* client);
+// Parse response from the server
+static int receive_server_response(client_t* client);
 
-	char* old_file_name = argv[4];
-	char* new_file_name = argv[5];
-	char* remote_file_name = argv[6];
-	client.block_size = atoi(argv[7]);
+int client_init(client_t* client, char* arguments[]){
+	client->hostname = arguments[2];
+	client->port = arguments[3];
+
+	client->old_file_name = arguments[4];
+	client->new_file_name = arguments[5];
+	client->remote_file_name = arguments[6];
+	client->block_size = atoi(arguments[7]);
 
 	socket_t skt;
-	client.skt = &skt;
-	socket_init(client.skt, hostname, port);
+	client->skt = &skt;
+	socket_init(client->skt, client->hostname, client->port);
+	socket_connect(client->skt);
+	// Open new file
+	client->new_file = NULL;
+	client->new_file = fopen(client->new_file_name, "wb");
 
-	if (socket_connect(client.skt) == 0){
-		// Open new file
-		client.new_file = NULL;
-		client.new_file = fopen(new_file_name, "wb");
+	// Open old file
+	client->old_file = NULL;
+	client->old_file = fopen(client->old_file_name, "rb");
 
-		send_remote_filename(client.skt, remote_file_name, client.block_size);
-
-		// Open old file
-		client.old_file = NULL;
-		client.old_file = fopen(old_file_name, "rb");
-		if (client.old_file != NULL){
-			send_file_chunks(&client, client.old_file, client.block_size);
-		}
-		receive_server_response(&client);
-
-		fclose(client.old_file);
-		fclose(client.new_file);
-	}
-	socket_destroy(client.skt);
 	return EXIT_SUCCESS;
 }
 
-int receive_server_response(client_t* client){
+int client_destroy(client_t* client){
+	fclose(client->old_file);
+	fclose(client->new_file);
+	socket_destroy(client->skt);
+	return EXIT_SUCCESS;
+}
+
+int client_run(client_t* client){
+	client_point_target_file(client->skt, client->remote_file_name, client->block_size);
+
+	if (client->old_file != NULL){
+		send_file_chunks(client, client->old_file, client->block_size);
+	}
+	receive_server_response(client);
+	return EXIT_SUCCESS;
+}
+
+static int receive_server_response(client_t* client){
 	// Receive server code
 	char server_code = -1;
 	while (server_code != EOF_INDICATOR){
@@ -62,7 +80,7 @@ int receive_server_response(client_t* client){
 	return EXIT_SUCCESS;
 }
 
-int receive_new_bytes(client_t* client){
+static int receive_new_bytes(client_t* client){
 	uint32_t new_bytes_longitude = 0;
 	socket_receive(client->skt, (char*)&new_bytes_longitude,
 			sizeof(new_bytes_longitude));
@@ -78,7 +96,7 @@ int receive_new_bytes(client_t* client){
 	return EXIT_SUCCESS;
 }
 
-int receive_existing_block(client_t* client){
+static int receive_existing_block(client_t* client){
 	uint32_t existing_block_index = -1;
 	socket_receive(client->skt, (char*)&existing_block_index,
 			sizeof(existing_block_index));
@@ -95,7 +113,7 @@ int receive_existing_block(client_t* client){
 	return EXIT_SUCCESS;
 }
 
-int send_remote_filename(socket_t* skt, char* filename,
+static int client_point_target_file(socket_t* skt, char* filename,
 		unsigned int block_size){
 	uint32_t filename_length = strlen(filename);
 	char *buffer = malloc(filename_length + 2 * sizeof(int));
@@ -115,7 +133,7 @@ int send_remote_filename(socket_t* skt, char* filename,
 	return EXIT_SUCCESS;
 }
 
-int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
+static int send_file_chunks(client_t* client, FILE* file, unsigned int block_size){
 	checksum_t checksum;
 	char* buffer = calloc(block_size + 1, sizeof(char));
 	while(!feof(file)){

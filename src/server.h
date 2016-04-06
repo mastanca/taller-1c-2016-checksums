@@ -14,7 +14,6 @@
 #include "lib_socket.h"
 #include "list.h"
 #include "lib_checksum.h"
-#include "file_handler.h"
 
 // Define server ADT
 typedef struct server{

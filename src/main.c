@@ -16,7 +16,10 @@
 int main(int argc, char *argv[]){
 	char* execution_type = argv[1];
 	if (strcmp(execution_type, CLIENT) == 0){
-		return client_execution(argv);
+		client_t client;
+		client_init(&client, argv);
+		client_run(&client);
+		return client_destroy(&client);
 	}else if (strcmp(execution_type, SERVER) == 0){
 		server_t server;
 		server_init(&server, argc, argv);
@@ -25,7 +28,5 @@ int main(int argc, char *argv[]){
 	} else {
 		return EXIT_FAILURE;
 	}
-	printf("return2\n");
-
 	return EXIT_SUCCESS;
 }

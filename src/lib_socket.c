@@ -75,11 +75,17 @@ int socket_accept(socket_t* skt, socket_t* client_skt) {
 
 int socket_connect(socket_t* skt) {
 	int s = 0;
+	struct addrinfo *ptr;
 	bool are_we_connected = false;
-	struct addrinfo *ptr = skt->result;
+	for (ptr = skt->result; ptr != NULL && are_we_connected == false;
+			ptr = ptr->ai_next) {
 		s = connect(skt->fd, ptr->ai_addr, ptr->ai_addrlen);
+		if (s == -1){
+			close(skt->fd);
+			skt->fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+		}
 		are_we_connected = (s != -1);
-
+	}
 	freeaddrinfo(skt->result);
 	if (are_we_connected == false){
 		return EXIT_FAILURE;

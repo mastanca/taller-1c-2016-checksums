@@ -179,6 +179,7 @@ static int checksum_not_found(server_t* server, char* block, list_t* window_out_
 	// Clean old bytes and read to block
 	memset(block, 0, strlen(block));
 	fread(block, sizeof(char), server->block_size, server->remote_file);
+
 	char* rolling_buffer = calloc(server->block_size + 1, sizeof(char));
 	rolling_buffer[0] = byte_to_window;
 	memcpy(rolling_buffer + strlen(rolling_buffer), block, strlen(block));
