@@ -19,12 +19,12 @@ int main(int argc, char *argv[]){
 		client_t client;
 		client_init(&client, argv);
 		client_run(&client);
-		return client_destroy(&client);
+		client_destroy(&client);
 	}else if (strcmp(execution_type, SERVER) == 0){
 		server_t server;
 		server_init(&server, argc, argv);
 		server_run(&server);
-		return server_destroy(&server);
+		server_destroy(&server);
 	} else {
 		return EXIT_FAILURE;
 	}

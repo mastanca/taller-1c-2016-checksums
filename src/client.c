@@ -109,7 +109,7 @@ static int receive_existing_block(client_t* client) {
 
 	char* old_bytes_buffer = calloc(client->block_size + 1, sizeof(char));
 	if (fread(old_bytes_buffer, sizeof(char), client->block_size,
-			client->old_file) != 0) {
+			client->old_file) == 0) {
 		free(old_bytes_buffer);
 		return EXIT_FAILURE;
 	}
