@@ -199,15 +199,24 @@ static int checksum_not_found(server_t* server, char* block,
 			+ (-1 * WINDOW_BYTE_DISPLACEMENT);
 	fseek(server->remote_file, index, SEEK_CUR);
 	// Clean old bytes and read to block
-	memset(block, 0, strlen(block));
+	memset(block, 0, server->block_size + 1);
 	if (fread(block, sizeof(char), server->block_size, server->remote_file)
 			!= 0) {
+		// Create new buffer to save 1 more byte than block size
+		char* rolling_buffer = calloc(server->block_size + 1, sizeof(char));
+		// Save windowed byte to new byte
+		rolling_buffer[0] = byte_to_window;
+		// Clear the rest of the buffer
+		memcpy(rolling_buffer + strlen(rolling_buffer), block, strlen(block));
+
 		checksum_t old_checksum;
 		checksum_init(&old_checksum);
 		old_checksum = *checksum;
 
-		checksum_rolling(checksum, &old_checksum, block, server->block_size);
+		checksum_rolling(checksum, &old_checksum, rolling_buffer +1,
+				server->block_size);
 
+		free(rolling_buffer);
 		return EXIT_SUCCESS;
 	}
 	return EXIT_FAILURE;

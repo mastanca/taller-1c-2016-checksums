@@ -40,9 +40,9 @@ int checksum_rolling(checksum_t* new_checksum, checksum_t* old_checksum,
 		char* buffer, size_t size) {
 	checksum_init(new_checksum);
 
-	new_checksum->lower = ((old_checksum->lower - (ulong) buffer[0]
+	new_checksum->lower = ((old_checksum->lower - (ulong) buffer[-1]
 			+ (ulong) buffer[size - 1])) % M;
-	new_checksum->higher = old_checksum->higher - (size * (ulong) buffer[0])
+	new_checksum->higher = old_checksum->higher - (size * (ulong) buffer[-1])
 			+ new_checksum->lower;
 
 	set_checksum_result(new_checksum);
