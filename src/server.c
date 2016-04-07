@@ -27,13 +27,34 @@ static int send_eof(socket_t* client_skt);
 // Returns the size of the checksums list
 static int get_size_of_checksum_list();
 
-int server_init(server_t* server, int arguments_count, char* arguments[]) {
-	if (arguments_count != 3) {
-		return EXIT_FAILURE;
-	}
+int server_init(server_t* server, char* port) {
+	server->port = port;
+	server->block_size = 0;
+	server->client_skt = NULL;
+	server->remote_file = NULL;
+	server->skt = NULL;
+	return EXIT_SUCCESS;
+}
+
+int server_destroy(server_t* server) {
+	socket_t* client = server->client_skt;
+	socket_t* skt = server->skt;
+	FILE* remote_file = server->remote_file;
+
+	if (server->client_skt != NULL)
+		socket_destroy(client);
+	if (server->skt != NULL)
+		socket_destroy(skt);
+	if (server->remote_file != NULL)
+		fclose(remote_file);
+	// Free checksum list
+	list_free(&(server->checksum_list));
+	return EXIT_SUCCESS;
+}
+
+int server_run(server_t* server) {
 	socket_t acep;
 	server->skt = &acep;
-	server->port = arguments[2];
 
 	list_t list;
 	// Compiler warning if this values are not zero before list init
@@ -52,19 +73,7 @@ int server_init(server_t* server, int arguments_count, char* arguments[]) {
 	server->client_skt = &client_skt;
 
 	socket_accept(server->skt, server->client_skt);
-	return EXIT_SUCCESS;
-}
 
-int server_destroy(server_t* server) {
-	socket_destroy(server->client_skt);
-	socket_destroy(server->skt);
-	fclose(server->remote_file);
-	// Free checksum list
-	list_free(&(server->checksum_list));
-	return EXIT_SUCCESS;
-}
-
-int server_run(server_t* server) {
 	receive_remote_filename(server->client_skt, server);
 
 	receive_checksum_list(server->client_skt, server);
@@ -95,15 +104,18 @@ static int start_comparison_sequence(server_t* server, socket_t* skt) {
 
 	while (!feof(server->remote_file)) {
 		int i = 0;
-		int found_index = -1;
-		while (i < get_size_of_checksum_list(server) && found_index < 0) {
+		int found_index = 1;
+		bool found = false;
+		while (i < get_size_of_checksum_list(server) && found_index >= 0
+				&& !found) {
 			unsigned int i_element = list_get(&server->checksum_list, i);
 			if (get_checksum(&checksum) == i_element) {
 				found_index = i;
+				found = true;
 			}
 			i++;
 		}
-		if (found_index < 0) {
+		if (found_index >= 0) {
 			checksum_not_found(server, block, &window_out_bytes, &checksum);
 		} else {
 			if (list_get_size(&window_out_bytes) > 0) {

@@ -14,7 +14,7 @@
 #include "lib_socket.h"
 #include "lib_checksum.h"
 
-typedef struct client{
+typedef struct client {
 	socket_t* skt;
 	char* hostname;
 	char* port;
@@ -24,10 +24,12 @@ typedef struct client{
 	FILE* old_file;
 	FILE* new_file;
 	unsigned int block_size;
-}client_t;
+} client_t;
 
 // Initiates client ADT
-int client_init(client_t* client, char* arguments[]);
+int client_init(client_t* client, char* hostname, char* port,
+		char* old_file_name, char* new_file_name, char* remote_file_name,
+		char* block_size);
 // Frees client's resources
 int client_destroy(client_t* client);
 // Run server

@@ -21,15 +21,30 @@ static int receive_existing_block(client_t* client);
 // Parse response from the server
 static int receive_server_response(client_t* client);
 
-int client_init(client_t* client, char* arguments[]) {
-	client->hostname = arguments[2];
-	client->port = arguments[3];
+int client_init(client_t* client, char* hostname, char* port,
+		char* old_file_name, char* new_file_name, char* remote_file_name,
+		char* block_size) {
+	client->hostname = hostname;
+	client->port = port;
 
-	client->old_file_name = arguments[4];
-	client->new_file_name = arguments[5];
-	client->remote_file_name = arguments[6];
-	client->block_size = atoi(arguments[7]);
+	client->old_file_name = old_file_name;
+	client->new_file_name = new_file_name;
+	client->remote_file_name = remote_file_name;
+	client->block_size = atoi(block_size);
 
+	return EXIT_SUCCESS;
+}
+
+int client_destroy(client_t* client) {
+	if (client->old_file != NULL)
+		fclose(client->old_file);
+	if (client->new_file != NULL)
+		fclose(client->new_file);
+	socket_destroy(client->skt);
+	return EXIT_SUCCESS;
+}
+
+int client_run(client_t* client) {
 	socket_t skt;
 	client->skt = &skt;
 	socket_init(client->skt, client->hostname, client->port);
@@ -42,19 +57,10 @@ int client_init(client_t* client, char* arguments[]) {
 	client->old_file = NULL;
 	client->old_file = fopen(client->old_file_name, "rb");
 
-	return EXIT_SUCCESS;
-}
-
-int client_destroy(client_t* client) {
-	fclose(client->old_file);
-	fclose(client->new_file);
-	socket_destroy(client->skt);
-	return EXIT_SUCCESS;
-}
-
-int client_run(client_t* client) {
-	client_point_target_file(client->skt, client->remote_file_name,
-			client->block_size);
+	socket_t* client_skt = client->skt;
+	char* remote_file_name = client->remote_file_name;
+	unsigned int blk_size = client->block_size;
+	client_point_target_file(client_skt, remote_file_name, blk_size);
 
 	if (client->old_file != NULL) {
 		send_file_chunks(client, client->old_file, client->block_size);

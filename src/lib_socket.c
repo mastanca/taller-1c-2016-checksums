@@ -39,12 +39,8 @@ int socket_init(socket_t* skt, char* hostname, char* port){
 }
 
 int socket_destroy(socket_t* skt){
-	if (shutdown(skt->fd, SHUT_RDWR) == -1){
-		return 1;
-	}
-	if (close(skt->fd) == -1){
-		return 1;
-	}
+	shutdown(skt->fd, SHUT_RDWR);
+	close(skt->fd);
 	return EXIT_SUCCESS;
 }
 

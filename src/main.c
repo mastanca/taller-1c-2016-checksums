@@ -13,16 +13,20 @@
 #define CLIENT "client"
 #define SERVER "server"
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
 	char* execution_type = argv[1];
-	if (strcmp(execution_type, CLIENT) == 0){
+	if (strcmp(execution_type, CLIENT) == 0) {
 		client_t client;
-		client_init(&client, argv);
+		client_init(&client, argv[2], argv[3], argv[4], argv[5], argv[6],
+				argv[7]);
 		client_run(&client);
 		client_destroy(&client);
-	}else if (strcmp(execution_type, SERVER) == 0){
+	} else if (strcmp(execution_type, SERVER) == 0) {
+		if (argc != 3) {
+			return EXIT_FAILURE;
+		}
 		server_t server;
-		server_init(&server, argc, argv);
+		server_init(&server, argv[2]);
 		server_run(&server);
 		server_destroy(&server);
 	} else {

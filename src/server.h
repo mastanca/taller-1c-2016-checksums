@@ -26,7 +26,7 @@ typedef struct server{
 }server_t;
 
 // Initiates server, returns 0 on success
-int server_init(server_t* server, int arguments_count, char* arguments[]);
+int server_init(server_t* server, char* port);
 // Starts the server algorithm
 int server_run(server_t* server);
 // Closes and frees server resources
