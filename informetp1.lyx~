@@ -71,7 +71,7 @@
 \begin_body
 
 \begin_layout Title
-Informe de Trabajo Practico Nº 1
+Informe de Trabajo Práctico Nº 1
 \end_layout
 
 \begin_layout Standard
@@ -111,10 +111,10 @@ Objetivo
 \end_layout
 
 \begin_layout Standard
-El objetivo del trabajo practico fue utilizar los conocimientos obtenidos
+El objetivo del trabajo práctico fue utilizar los conocimientos obtenidos
  en las clases de sockets y TDAs.
  Para ello se usaron las librerías de socket provistas por el entorno y
- se desarrollaron un conjunto de TDAs que se explicaran en secciones posteriores.
+ se desarrollaron un conjunto de TDAs que se explicarán en secciones posteriores.
 \end_layout
 
 \begin_layout Section*
@@ -152,7 +152,7 @@ El servidor recibe los checksums del cliente y compara contra los checksums
  el archivo local del cliente.
  En caso de que haya un bloque nuevo se le enviara al cliente los nuevos
  bytes que debe agregar a su archivo.
- Finalmente el cliente escribe en un nuevo archivo los datos que ya tenia
+ Finalmente el cliente escribe en un nuevo archivo los datos que ya tenía
  y los que recibe del lado del servidor.
 \end_layout
 
@@ -161,9 +161,9 @@ Desarrollo
 \end_layout
 
 \begin_layout Standard
-A continuación se detallara el algoritmo mas complejo del trabajo, el cual
- es como el servidor compara los checksums recibidos con los de su archivo
- remoto y notifica al cliente.
+A continuación se detallara el algoritmo más complejo del trabajo: donde
+ el servidor compara los checksums recibidos con los de su archivo remoto
+ y notifica al cliente.
 \end_layout
 
 \begin_layout Standard
@@ -180,8 +180,11 @@ Adler32.
 \emph default
 Seguido de esto comienza a iterar.
  En caso de que el checksum no este en la lista de checksums que recibió
- del cliente, desplaza la ventana de lectura del target en 1 byte y guarda
- el byte que quedo fuera de la ventana en un buffer.
+ del cliente, desplaza la ventana de lectura del 
+\emph on
+target
+\emph default
+ en 1 byte y guarda el byte que quedo fuera de la ventana en un buffer.
  A continuación calcula el 
 \emph on
 rolling checksum
@@ -206,10 +209,13 @@ Se calcula el rolling checksum ya que es mas eficiente que volver a calcular
 En el caso en que el checksum este en la lista de checksums que el cliente
  le envió, entonces se fija si tiene bytes que hayan sido desplazados de
  la ventana y guardados en el buffer.
- Si hay entonces le envía esos bytes al cliente.
- Si no hay bytes desplazados entonces envía al cliente el numero de bloque
- que este tiene en su archivo local para el cual el checksum del archivo
- target coincide.
+ Si hay, le envía esos bytes al cliente.
+ Si no hay bytes desplazados, envía al cliente el numero de bloque que este
+ tiene en su archivo local para el cual el checksum del archivo 
+\emph on
+target
+\emph default
+ coincide.
  Para terminar mueve la ventana de lectura en un bloque, le calcula su checksum
  y reinicia la iteración.
 \begin_inset Newline newline
@@ -260,7 +266,7 @@ centering
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Diagrama de estados
+Diagrama de flujo
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:Diagrama-de-estados"
@@ -295,25 +301,7 @@ En este trabajo se utilizaron conocimientos nuevos, aprendidos en las clases
  Si bien al principio el problema de los sockets puede ser un poco complejo,
  una correcta utilización de TDAs y por ende un correcto encapsulamiento
  permite que nos podamos enfocar de lleno en lo mas importante del enunciado
- del trabajo practico, como lo es la sincronización de archivos.
-\end_layout
-
-\begin_layout Subsection*
-\begin_inset Newpage pagebreak
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset External
-	template PDFPages
-	filename 95188-ej1.1.2016-03-27-1658.pdf
-	extra LaTeX "pages=-"
-
-\end_inset
-
-
+ del trabajo práctico, como lo es la sincronización de archivos.
 \end_layout
 
 \end_body
