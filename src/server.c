@@ -115,7 +115,7 @@ static int start_comparison_sequence(server_t* server, socket_t* skt) {
 			}
 			i++;
 		}
-		if (found_index >= 0) {
+		if (!found) {
 			checksum_not_found(server, block, &window_out_bytes, &checksum);
 		} else {
 			if (list_get_size(&window_out_bytes) > 0) {
