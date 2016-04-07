@@ -20,7 +20,8 @@ int main(int argc, char *argv[]) {
 		client_init(&client, argv[2], argv[3], argv[4], argv[5], argv[6],
 				argv[7]);
 		client_run(&client);
-		client_destroy(&client);
+		// client_destroy is called inside run due to valgrind errors if done
+		// otherwise
 	} else if (strcmp(execution_type, SERVER) == 0) {
 		if (argc != 3) {
 			return EXIT_FAILURE;
@@ -28,7 +29,8 @@ int main(int argc, char *argv[]) {
 		server_t server;
 		server_init(&server, argv[2]);
 		server_run(&server);
-		server_destroy(&server);
+		// server_destroy is called inside run due to valgrind errors if done
+		// otherwise
 	} else {
 		return EXIT_FAILURE;
 	}

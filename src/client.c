@@ -66,6 +66,11 @@ int client_run(client_t* client) {
 		send_file_chunks(client, client->old_file, client->block_size);
 	}
 	receive_server_response(client);
+
+	// Ok, so really tried to call client_destroy outside of here
+	// but valgrind was advising of some uninitalized bytes
+	client_destroy(client);
+
 	return EXIT_SUCCESS;
 }
 

@@ -80,6 +80,10 @@ int server_run(server_t* server) {
 
 	start_comparison_sequence(server, server->client_skt);
 
+	// Ok, so really tried to call server_destroy outside of here
+	// but valgrind was advising of some uninitalized bytes
+	server_destroy(server);
+
 	return EXIT_SUCCESS;
 }
 
