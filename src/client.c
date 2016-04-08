@@ -35,7 +35,7 @@ int client_init(client_t* client, char* hostname, char* port,
 	return EXIT_SUCCESS;
 }
 
-int client_destroy(client_t* client) {
+static int client_destroy(client_t* client) {
 	if (client->old_file != NULL)
 		fclose(client->old_file);
 	if (client->new_file != NULL)

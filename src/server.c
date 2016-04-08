@@ -36,7 +36,7 @@ int server_init(server_t* server, char* port) {
 	return EXIT_SUCCESS;
 }
 
-int server_destroy(server_t* server) {
+static int server_destroy(server_t* server) {
 	socket_t* client = server->client_skt;
 	socket_t* skt = server->skt;
 	FILE* remote_file = server->remote_file;

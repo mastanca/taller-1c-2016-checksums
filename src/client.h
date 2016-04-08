@@ -30,9 +30,9 @@ typedef struct client {
 int client_init(client_t* client, char* hostname, char* port,
 		char* old_file_name, char* new_file_name, char* remote_file_name,
 		char* block_size);
-// Frees client's resources
-int client_destroy(client_t* client);
-// Run server
+//// Frees client's resources
+//int client_destroy(client_t* client);
+// Run client, resources are freed upon exit
 int client_run(client_t* client);
 
 #endif /* SRC_CLIENT_H_ */
